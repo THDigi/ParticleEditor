@@ -153,14 +153,26 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.DirectionConeVar)] = new PropertyData() // animated 1D float
             {
-                NameOverride = "Direction cone",
-                ValueRangeNum = new ValueInfo<float>(-360f, 360f), // TODO: are negative values useful here?
+                NameOverride = $"Radial Shape ({EditorUI.DefaultEmitter.DirectionConeVar.Name})",
+                TooltipOverride = "Starts from a line 0deg and works its way up to a full sphere at 360deg, affected by Direction.",
+                ValueRangeNum = new ValueInfo<float>(0f, 360f),
                 RequiredKeys1D = 0,
             },
             [new PropId(MyGPUGenerationPropertiesEnum.DirectionInnerCone)] = new PropertyData() // animated 1D float
             {
-                ValueRangeNum = new ValueInfo<float>(-360f, 360f), // TODO: are negative values useful here?
                 RequiredKeys1D = 0,
+            },
+
+            [new PropId(MyGPUGenerationPropertiesEnum.EmitterSize)] = new PropertyData() // animated 1D Vector3
+            {
+                NameOverride = $"Shape Size ({EditorUI.DefaultEmitter.EmitterSize.Name})",
+                TooltipAddition = "Relies on 'Radial Shape' to determine shape.",
+                ValueRangeVector3 = new ValueInfo<Vector3>(new Vector3(0), new Vector3(1000000)),
+            },
+            [new PropId(MyGPUGenerationPropertiesEnum.EmitterSizeMin)] = new PropertyData() // animated 1D float
+            {
+                NameOverride = $"Inner Carve Ratio ({EditorUI.DefaultEmitter.EmitterSizeMin.Name})",
+                //ValueRangeNum = new ValueInfo<float>(0f, 1f),
             },
 
             [new PropId(MyGPUGenerationPropertiesEnum.Acceleration)] = new PropertyData() // Vector3
@@ -176,6 +188,7 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.Velocity)] = new PropertyData() // animated 1D float
             {
+                TooltipAddition = "If using Radial Shape > 0, this will make particle go outwards from center.",
                 ValueRangeNum = new ValueInfo<float>(0f, 100f, defaultValue: 0f, round: 1),
                 RequiredKeys1D = 0,
             },
@@ -186,15 +199,6 @@ namespace Digi.ParticleEditor.GameData
                                   "\nFormula used: (Velocity + Random(-1,1) * VelocityVariance) * UserScale * UserVelocityMultiplier",
                 ValueRangeNum = new ValueInfo<float>(0f, 100f, defaultValue: 0f, round: 1),
                 RequiredKeys1D = 0,
-            },
-
-            [new PropId(MyGPUGenerationPropertiesEnum.EmitterSize)] = new PropertyData() // animated 1D Vector3
-            {
-                ValueRangeVector3 = new ValueInfo<Vector3>(new Vector3(0), new Vector3(1000000)),
-            },
-            [new PropId(MyGPUGenerationPropertiesEnum.EmitterSizeMin)] = new PropertyData() // animated 1D float
-            {
-                ValueRangeNum = new ValueInfo<float>(0, 1000000),
             },
 
             [new PropId(MyGPUGenerationPropertiesEnum.RotationReference)] = new PropertyData() // enum

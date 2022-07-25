@@ -432,6 +432,10 @@ namespace Digi.ParticleEditor
 
                     ScrollHost.PropAnimated(emitter, emitter.ParticlesPerSecond);
 
+                    ScrollHost.PropAnimated(emitter, emitter.DirectionConeVar);
+
+                    ScrollHost.PropAnimated(emitter, emitter.DirectionInnerCone);
+
                     ScrollHost.PropAnimated(emitter, emitter.EmitterSize);
 
                     ScrollHost.PropAnimated(emitter, emitter.EmitterSizeMin);
@@ -464,10 +468,6 @@ namespace Digi.ParticleEditor
                     ScrollHost.PropNumberBoxVector3(emitter, emitter.Acceleration);
 
                     ScrollHost.PropAnimated(emitter, emitter.AccelerationFactor);
-
-                    ScrollHost.PropAnimated(emitter, emitter.DirectionConeVar);
-
-                    ScrollHost.PropAnimated(emitter, emitter.DirectionInnerCone);
 
                     ScrollHost.PropCheckbox(emitter, emitter.RotationEnabled);
 
