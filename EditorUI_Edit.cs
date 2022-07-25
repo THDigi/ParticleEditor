@@ -154,15 +154,21 @@ namespace Digi.ParticleEditor
                 {
                     FileDialog<SaveFileDialog>("Save a particle effect", null, FileDialogFilterSBC, (filePath) =>
                     {
-                        MyObjectBuilder_ParticleEffect particleOB = MyParticleEffectDataSerializer.SerializeToObjectBuilder(SelectedParticle.Data);
-                        MyObjectBuilder_Definitions definitionsOB = new MyObjectBuilder_Definitions();
-                        definitionsOB.ParticleEffects = new MyObjectBuilder_ParticleEffect[] { particleOB };
+                        try
+                        {
+                            MyObjectBuilder_ParticleEffect particleOB = MyParticleEffectDataSerializer.SerializeToObjectBuilder(SelectedParticle.Data);
+                            MyObjectBuilder_Definitions definitionsOB = new MyObjectBuilder_Definitions();
+                            definitionsOB.ParticleEffects = new MyObjectBuilder_ParticleEffect[] { particleOB };
 
-                        string xml = MyAPIGateway.Utilities.SerializeToXML(definitionsOB);
-
-                        File.WriteAllText(filePath, xml);
-
-                        Notifications.Show($"Succesfully saved {SelectedParticle.Name} to:\n{filePath}", 5);
+                            if(EditorUI.SerializeToXML(filePath, definitionsOB))
+                            {
+                                Notifications.Show($"Succesfully saved {SelectedParticle.Name} to:\n{filePath}", 5);
+                            }
+                        }
+                        catch(Exception e)
+                        {
+                            Log.Error(e);
+                        }
                     });
                 }
                 catch(Exception e)

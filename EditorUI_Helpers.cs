@@ -11,6 +11,7 @@ using Sandbox;
 using Sandbox.Game.Gui;
 using Sandbox.Graphics.GUI;
 using VRage.Game;
+using VRage.ObjectBuilders;
 using VRage.Render.Particles;
 using VRage.Utils;
 using VRageMath;
@@ -68,6 +69,23 @@ namespace Digi.ParticleEditor
             xml = xml.Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>\n", "");
             xml = xml.Replace("xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", "");
             return xml;
+        }
+
+        public static bool SerializeToXML(string filePath, MyObjectBuilder_Base ob)
+        {
+            try
+            {
+                //string xml = MyAPIGateway.Utilities.SerializeToXML(particleOB);
+                //xml = xml.Replace(" encoding=\"utf-16\"", "");
+                //File.WriteAllText(filePath, xml);
+
+                return MyObjectBuilderSerializer.SerializeXML(filePath, false, ob);
+            }
+            catch(Exception e)
+            {
+                Log.Error(e);
+                return false;
+            }
         }
 
         public static bool CanReadInputs()

@@ -9,6 +9,7 @@ using Sandbox.Graphics;
 using Sandbox.ModAPI;
 using VRage.FileSystem;
 using VRage.Game;
+using VRage.ObjectBuilders;
 using VRage.Render.Particles;
 using VRage.Utils;
 using VRageMath;
@@ -164,36 +165,47 @@ namespace Digi.ParticleEditor
 
         void BackupParticle(string fileNameNoExtension, MyObjectBuilder_ParticleEffect particleOB)
         {
-            string xml = MyAPIGateway.Utilities.SerializeToXML(particleOB);
-
-            string fileName = fileNameNoExtension;
-
-            foreach(char c in Path.GetInvalidFileNameChars())
+            try
             {
-                fileName = fileName.Replace(c, '_');
-            }
+                string fileName = fileNameNoExtension;
 
-            fileName += ".sbc";
-
-            Directory.CreateDirectory(BackupPath);
-
-            string filePath = Path.Combine(BackupPath, fileName);
-            string oldFile = Path.Combine(BackupPath, fileName + " (previous).sbc");
-
-            if(File.Exists(filePath))
-            {
-                if(File.Exists(oldFile))
+                foreach(char c in Path.GetInvalidFileNameChars())
                 {
-                    File.Delete(oldFile);
+                    fileName = fileName.Replace(c, '_');
                 }
 
-                File.Move(filePath, oldFile);
+                fileName += ".sbc";
+
+                Directory.CreateDirectory(BackupPath);
+
+                string filePath = Path.Combine(BackupPath, fileName);
+                string oldFile = Path.Combine(BackupPath, fileName + " (previous).sbc");
+
+                if(File.Exists(filePath))
+                {
+                    if(File.Exists(oldFile))
+                    {
+                        File.Delete(oldFile);
+                    }
+
+                    File.Move(filePath, oldFile);
+                }
+
+                MyObjectBuilder_Definitions definitionsOB = new MyObjectBuilder_Definitions();
+                definitionsOB.ParticleEffects = new MyObjectBuilder_ParticleEffect[] { particleOB };
+
+                if(!EditorUI.SerializeToXML(filePath, definitionsOB))
+                {
+                    Notifications.Show($"Failed to backup particle {particleOB.Id.SubtypeName} ! Check SE log.", 5, Color.Red);
+                }
+            }
+            catch(Exception e)
+            {
+                Log.Error(e);
             }
 
-            File.WriteAllText(filePath, xml);
-
-            ShowBackupIcon = false;
             BackupFinsihedAt = Time;
+            ShowBackupIcon = false;
         }
 
         void InsertUnhandledExceptionHandler()
