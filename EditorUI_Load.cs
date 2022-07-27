@@ -191,7 +191,7 @@ Also, particles of the same name share the same data so changes will affect it w
             List<(MyParticleEffectData, int)> showParticles = new List<(MyParticleEffectData, int)>();
 
             int tick = MySession.Static.GameplayFrameCounter;
-            int minTickSeen = tick - (60 * 5); // at most 5 seconds ago
+            int minTickSeen = tick - (60 * 60); // at most 1 minute ago
 
             foreach(KeyValuePair<string, MyParticleEffectData> kv in MyParticleEffectsLibrary.GetByName())
             {
