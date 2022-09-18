@@ -63,7 +63,7 @@ Also, particles of the same name share the same data so changes will affect it w
 
                         NamePrompt = new ValueGetScreenWithCaption($"Create particle", name, (text) =>
                         {
-                            return CreateParticle(name);
+                            return CreateParticle(text);
                         });
                         MyGuiSandbox.AddScreen(NamePrompt);
                     });
