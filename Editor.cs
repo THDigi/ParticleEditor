@@ -112,9 +112,11 @@ namespace Digi.ParticleEditor
                 return;
             }
 
+            bool inMenu = MySandboxGame.Static.IsCursorVisible || (MyAPIGateway.Gui?.ChatEntryVisible ?? false);
+
             if(!MySession.Static.IsServer || MySession.Static.OnlineMode != MyOnlineModeEnum.OFFLINE)
             {
-                if(!MySandboxGame.Static.IsCursorVisible && MyInput.Static.IsNewKeyPressed(MyKeys.F) && MyInput.Static.IsAnyShiftKeyPressed())
+                if(!inMenu && MyInput.Static.IsNewKeyPressed(MyKeys.F) && MyInput.Static.IsAnyShiftKeyPressed())
                     MyAPIGateway.Utilities.ShowNotification("Partile Editor only allowed in offline worlds", 3000, MyFontEnum.Red);
 
                 if(ShowEditor)
@@ -123,7 +125,7 @@ namespace Digi.ParticleEditor
                 return;
             }
 
-            if(!MySandboxGame.Static.IsCursorVisible && MyInput.Static.IsNewKeyPressed(MyKeys.F) && MyInput.Static.IsAnyShiftKeyPressed())
+            if(!inMenu && MyInput.Static.IsNewKeyPressed(MyKeys.F) && MyInput.Static.IsAnyShiftKeyPressed())
             {
                 if(!ShowEditor)
                     OpenEditor();
