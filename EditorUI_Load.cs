@@ -30,7 +30,7 @@ namespace Digi.ParticleEditor
 
         bool Controls_LoadParticle()
         {
-            MyGuiControlLabel labelTitle = Host.CreateLabel("Particle Editor");
+            MyGuiControlLabel labelTitle = Host.CreateLabel($"Particle Editor v{ParticleEditorPlugin.Version.ToString()}");
             labelTitle.SetToolTip(@"Some notes about the behavior of this tool:
 
 It sees all particles loaded into the game, including mod-added ones (but it cannot identify the mod unfortunately).
@@ -72,13 +72,13 @@ Also, particles of the same name share the same data so changes will affect it w
                         MyGuiSandbox.AddScreen(NamePrompt);
                     });
 
-                MyGuiControlButton buttonLoadFromFile = Host.CreateButton("Load from file(s)",
+                MyGuiControlButton buttonLoadFromFile = Host.CreateButton("Load from SBC",
                     "Opens file explorer to pick one or more .sbc file(s) to load particles from." +
                     "\nWill prompt for override and for picking the particles to load if multiple are found." +
                     "\nRemember that all particle changes, including loaded ones, are only in-memory. You need to export them to .sbc to keep them.",
                     clicked: (b) => LoadParticleDialog());
 
-                Host.PositionControls(labelTitle, buttonCreateParticle, buttonLoadFromFile);
+                Host.PositionControls(labelTitle, Host.CreateLabel(""), buttonCreateParticle, buttonLoadFromFile);
 
                 MyGuiControlButton buttonBack = Host.CreateButton($"< Back to {SelectedParticle.Name ?? "particle"}", "", clicked: (button) =>
                 {

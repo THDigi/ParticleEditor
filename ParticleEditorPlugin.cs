@@ -1,17 +1,21 @@
 ﻿using System;
 using VRage.Plugins;
+using VRage.Utils;
 
 namespace Digi.ParticleEditor
 {
     public class ParticleEditorPlugin : IPlugin
     {
+        public static readonly Version Version = new Version(1, 0, 2);
+
         Editor Editor;
 
-        public override string ToString() => "Particle Editor Plugin";
+        public override string ToString() => $"Particle Editor Plugin v{Version.ToString()}";
 
         public void Init(object gameInstance)
         {
             Log.Name = "ParticleEditorPlugin";
+            MyLog.Default.WriteLine($"{this.ToString()} loaded.");
 
             try
             {
