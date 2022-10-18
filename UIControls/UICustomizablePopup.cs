@@ -13,17 +13,19 @@ namespace Digi.ParticleEditor.UIControls
 
         public Action<VerticalControlsHost> ControlGetter;
 
-        static readonly Vector2 ScreenPosition = new Vector2(0.5f, 0.95f);
-        static readonly Vector2 ScreenSize = new Vector2(0.5f, 0.2f);
+        static readonly Vector2 DefaultScreenPosition = new Vector2(0.5f, 0.95f);
+        static readonly Vector2 DefaultScreenSize = new Vector2(0.5f, 0.2f);
 
         public override string GetFriendlyName() => nameof(UICustomizablePopup);
 
-        public UICustomizablePopup(string closeButtonTooltip = null)
-            : base(ScreenPosition, size: ScreenSize, isTopMostScreen: false)
+        public UICustomizablePopup(string closeButtonTooltip = null, Vector2? screenPosition = null, Vector2? screenSize = null)
+            : base(screenPosition ?? DefaultScreenPosition, size: screenSize ?? DefaultScreenSize, isTopMostScreen: false)
         {
             CloseButtonTooltip = closeButtonTooltip;
             Align = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_BOTTOM;
-            Host = new VerticalControlsHost(this, new Vector2(ScreenSize.X / -2f, -ScreenSize.Y), ScreenSize, drawBackground: true);
+
+            var size = screenSize ?? DefaultScreenSize;
+            Host = new VerticalControlsHost(this, new Vector2(size.X / -2f, -size.Y), size, drawBackground: true);
 
             m_closeOnEsc = true;
             CanBeHidden = true;

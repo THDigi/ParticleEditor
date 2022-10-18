@@ -202,7 +202,49 @@ namespace Digi.ParticleEditor
             thread.Start();
         }
 
-        public static void FinalizeScrollable(MyGuiControlScrollablePanel panel, MyGuiControlParent content, VerticalControlsHost host, Func<bool> grayOutCondition)
+        public static void OpenMultipleFilesDialog(string title, string directory, string filter, Action<string[]> callback)
+        {
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                try
+                {
+                    using(OpenFileDialog dialog = new OpenFileDialog())
+                    {
+                        if(directory != null && Directory.Exists(directory))
+                            dialog.InitialDirectory = directory;
+
+                        dialog.Title = title;
+                        dialog.Filter = filter;
+                        dialog.RestoreDirectory = true;
+                        dialog.AddExtension = true;
+                        dialog.AutoUpgradeEnabled = true;
+                        dialog.Multiselect = true;
+
+                        Form GetMainForm()
+                        {
+                            if(Application.OpenForms.Count > 0)
+                                return Application.OpenForms[0];
+                            else
+                                return new Form { TopMost = true };
+                        }
+
+                        if(dialog.ShowDialog(GetMainForm()) == DialogResult.OK)
+                        {
+                            MySandboxGame.Static.Invoke(() => callback(dialog.FileNames), "ParticleEditorPlugin-MultiOpenFileDialog");
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    Log.Error(e);
+                }
+            }));
+
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+        }
+
+        public static void FinalizeScrollable(MyGuiControlScrollablePanel panel, MyGuiControlParent content, VerticalControlsHost host, Func<bool> grayOutCondition = null)
         {
             bool grayedControls = grayOutCondition?.Invoke() ?? false;
 

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
-using System.Windows.Forms;
+using Digi.ParticleEditor.UIControls;
 using Sandbox.Game.Screens;
 using Sandbox.Game.Screens.Helpers;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
 using Sandbox.ModAPI;
 using VRage.Game;
+using VRage.ObjectBuilders;
 using VRage.Render.Particles;
 using VRageMath;
 using VRageRender.Animations;
@@ -40,7 +42,9 @@ Also, particles of the same name share the same data so changes will affect it w
 
             if(!ShowParticlePicker && SelectedParticle.Name != null)
             {
-                MyGuiControlButton buttonChangeParticle = Host.CreateButton("Change Particle", "Goes back to the particle browser without unloading the particle nor losing any changes.", clicked: (b) =>
+                MyGuiControlButton buttonChangeParticle = Host.CreateButton("Change Particle",
+                    "Shows the particle browser." +
+                    "\nChanges to this particle remain in memory regardless, do not forget to export if you wish to keep them.", clicked: (b) =>
                 {
                     ShowParticlePicker = true;
                     RefreshUI();
@@ -68,9 +72,9 @@ Also, particles of the same name share the same data so changes will affect it w
                         MyGuiSandbox.AddScreen(NamePrompt);
                     });
 
-                MyGuiControlButton buttonLoadFromFile = Host.CreateButton("Load from file",
-                    "Opens file explorer to pick a .sbc file to load particles from." +
-                    "\nWill load all particles from that file and ask if you wish to overwrite them, if necessary." +
+                MyGuiControlButton buttonLoadFromFile = Host.CreateButton("Load from file(s)",
+                    "Opens file explorer to pick one or more .sbc file(s) to load particles from." +
+                    "\nWill prompt for override and for picking the particles to load if multiple are found." +
                     "\nRemember that all particle changes, including loaded ones, are only in-memory. You need to export them to .sbc to keep them.",
                     clicked: (b) => LoadParticleDialog());
 
@@ -126,7 +130,7 @@ Also, particles of the same name share the same data so changes will affect it w
                 RefreshParticlesList();
 
                 MyGuiControlButton buttonLoadSelected = Host.CreateButton("Load selected",
-                    null,
+                    "You can also doubleclick a particle in the list to cause this action.",
                     clicked: (b) => LoadSelected());
 
                 MyGuiControlButton buttonCreateFromSelected = Host.CreateButton("Duplicate selection",
@@ -346,59 +350,290 @@ Tag: {data.Tag}";
             return true;
         }
 
+        class LoadParticleInfo
+        {
+            public readonly string FileName;
+            public readonly MyObjectBuilder_ParticleEffect OB;
+            public bool Collides = false;
+
+            public LoadParticleInfo(string fileName, MyObjectBuilder_ParticleEffect ob)
+            {
+                FileName = fileName;
+                OB = ob;
+            }
+        }
+
         public void LoadParticleDialog(string overrideFolder = null)
         {
-            // TODO: allow multiple files? for backup load too...
+            MyParticleEffectData lastLoadedData = null;
+            int loadedCount = 0;
 
-            FileDialog<OpenFileDialog>("Load particle(s)", overrideFolder, FileDialogFilterSBC, (filePath) =>
+            OpenMultipleFilesDialog("Load particle(s)", overrideFolder, FileDialogFilterSBC, (filePaths) =>
             {
                 try
                 {
-                    string text = File.ReadAllText(filePath);
-                    if(string.IsNullOrWhiteSpace(text))
-                    {
-                        PopupInfo("Error", "File contents is empty", MyMessageBoxStyleEnum.Error);
-                        return;
-                    }
+                    List<LoadParticleInfo> foundParticles = new List<LoadParticleInfo>();
 
-                    if(text.Contains("<ParticleEffects>"))
+                    foreach(string filePath in filePaths)
                     {
-                        MyObjectBuilder_Definitions definitionsOB = MyAPIGateway.Utilities.SerializeFromXML<MyObjectBuilder_Definitions>(text);
-                        if(definitionsOB == null)
-                            throw new Exception("It got deserialized as Definitions but returned null.");
-
-                        if(definitionsOB.ParticleEffects.Length == 0)
+                        string text = File.ReadAllText(filePath);
+                        if(string.IsNullOrWhiteSpace(text))
                         {
-                            PopupInfo("Error", "Definitions does not contain any particle effects.", MyMessageBoxStyleEnum.Error);
-                            return;
+                            Log.Error($"File is empty: '{filePath}'");
+                            continue;
                         }
 
-                        if(definitionsOB.ParticleEffects.Length > 1)
+                        string fileName = Path.GetFileName(filePath);
+
+                        if(text.Contains("<ParticleEffects>"))
                         {
-                            // TODO: a 3rd option to pick one of the particles
-                            PopupInfoAction("Multiple particles", $"This file contains multiple {definitionsOB.ParticleEffects.Length} particles!", "Load and overwrite all", "Cancel", (result) =>
+                            MyObjectBuilder_Definitions definitionsOB;
+                            if(!MyObjectBuilderSerializer.DeserializeXML<MyObjectBuilder_Definitions>(filePath, out definitionsOB) || definitionsOB == null)
                             {
-                                if(result == MyGuiScreenMessageBox.ResultEnum.YES)
-                                {
-                                    foreach(MyObjectBuilder_ParticleEffect ob in definitionsOB.ParticleEffects)
-                                    {
-                                        AddOrReplaceParticleOB(ob);
-                                    }
-                                }
-                            }, MyMessageBoxStyleEnum.Info);
+                                Log.Error($"'{fileName}': Couldn't deserialize, see SE log maybe there's something.");
+                                continue;
+                            }
+
+                            if(definitionsOB.ParticleEffects.Length == 0)
+                            {
+                                Log.Error($"'{fileName}': Does not contain any valid particle effects.");
+                                continue;
+                            }
+
+                            foreach(MyObjectBuilder_ParticleEffect particleOB in definitionsOB.ParticleEffects)
+                            {
+                                foundParticles.Add(new LoadParticleInfo(fileName, particleOB));
+                            }
                         }
                         else
                         {
-                            LoadParticleFromOB(definitionsOB.ParticleEffects[0]);
+                            MyObjectBuilder_ParticleEffect particleOB = MyAPIGateway.Utilities.SerializeFromXML<MyObjectBuilder_ParticleEffect>(text);
+
+                            if(particleOB == null)
+                                throw new Exception("It got deserialized as ParticleEffect but returned null.");
+
+                            foundParticles.Add(new LoadParticleInfo(filePath, particleOB));
                         }
+                    }
+
+                    if(foundParticles.Count <= 0)
+                    {
+                        Notifications.Show("Found 0 particle effects.", 5, Color.Yellow);
+                        return;
+                    }
+                    else if(foundParticles.Count == 1)
+                    {
+                        LoadSingleParticleFromOB(foundParticles[0].OB);
                     }
                     else
                     {
-                        MyObjectBuilder_ParticleEffect particleOB = MyAPIGateway.Utilities.SerializeFromXML<MyObjectBuilder_ParticleEffect>(text);
-                        if(particleOB == null)
-                            throw new Exception("It got deserialized as ParticleEffect but returned null.");
+                        foundParticles.Sort((a, b) => a.OB.Id.SubtypeName.CompareTo(b.OB.Id.SubtypeName));
 
-                        LoadParticleFromOB(particleOB);
+                        // check duplicates which are always next to eachother because of the above sorting
+                        for(int i = 1; i < foundParticles.Count; i++)
+                        {
+                            LoadParticleInfo piA = foundParticles[i - 1];
+                            LoadParticleInfo piB = foundParticles[i];
+                            if(piA.OB.Id.SubtypeName == piB.OB.Id.SubtypeName)
+                            {
+                                piA.Collides = true;
+                                piB.Collides = true;
+                            }
+                        }
+
+                        UICustomizablePopup screen = new UICustomizablePopup(closeButtonTooltip: "Cancels loading.", screenSize: new Vector2(0.5f, 0.8f));
+
+                        HashSet<string> selectedParticles = new HashSet<string>();
+                        List<MyGuiControlCheckbox> checkboxes = new List<MyGuiControlCheckbox>(foundParticles.Count);
+
+                        screen.ControlGetter = (innerHost) =>
+                        {
+                            const string CollidingNamesTitle = "Same particle declared multiple times!";
+                            const string CollidingNamesText = "At least one particle name is used by multiple definitions (the yellow colored ones)." +
+                                                              "\nRecommended to check only one of them and use 'Load only selected'.";
+
+                            var loadOverride = innerHost.CreateButton("Load all + override", "Loads all found particles and overrides if they match any existing ones.",
+                                clicked: (b) =>
+                                {
+                                    if(foundParticles.Any(pi => pi.Collides))
+                                    {
+                                        PopupInfoAction(CollidingNamesTitle, CollidingNamesText,
+                                            "Continue, load whichever", "Go back", (result) =>
+                                            {
+                                                if(result == MyGuiScreenMessageBox.ResultEnum.YES)
+                                                    DoTheThing();
+                                            });
+                                    }
+                                    else
+                                    {
+                                        DoTheThing();
+                                    }
+
+                                    void DoTheThing()
+                                    {
+                                        try
+                                        {
+                                            foreach(LoadParticleInfo pi in foundParticles)
+                                            {
+                                                AddOrReplaceParticleOB(pi.OB);
+                                            }
+
+                                            FinalizeLoading();
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            Log.Error(e);
+                                        }
+
+                                        screen.CloseScreen();
+                                    }
+                                });
+
+                            var loadNew = innerHost.CreateButton("Load only new", "Loads only particles that don't already exist in memory (no override).",
+                                clicked: (b) =>
+                                {
+                                    if(foundParticles.Any(pi => pi.Collides))
+                                    {
+                                        PopupInfoAction(CollidingNamesTitle, CollidingNamesText,
+                                            "Continue, load whichever", "Go back", (result) =>
+                                            {
+                                                if(result == MyGuiScreenMessageBox.ResultEnum.YES)
+                                                    DoTheThing();
+                                            });
+                                    }
+                                    else
+                                    {
+                                        DoTheThing();
+                                    }
+
+                                    void DoTheThing()
+                                    {
+                                        try
+                                        {
+                                            foreach(LoadParticleInfo pi in foundParticles)
+                                            {
+                                                if(!MyParticleEffectsLibrary.Exists(pi.OB.Id.SubtypeName))
+                                                    AddOrReplaceParticleOB(pi.OB);
+                                            }
+
+                                            FinalizeLoading();
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            Log.Error(e);
+                                        }
+
+                                        screen.CloseScreen();
+                                    }
+                                });
+
+                            innerHost.PositionControls(loadOverride, loadNew);
+
+                            innerHost.InsertSeparator();
+
+                            var invertSelection = innerHost.CreateButton("Invert selection", "Uncheck all checked and check all unchecked.",
+                            clicked: (b) =>
+                            {
+                                HashSet<string> inverted = new HashSet<string>();
+
+                                foreach(LoadParticleInfo pi in foundParticles)
+                                {
+                                    if(!selectedParticles.Contains(pi.OB.Id.SubtypeName))
+                                        inverted.Add(pi.OB.Id.SubtypeName);
+                                }
+
+                                selectedParticles = inverted;
+
+                                foreach(MyGuiControlCheckbox cb in checkboxes)
+                                {
+                                    cb.IsChecked = selectedParticles.Contains((string)cb.UserData);
+                                }
+                            });
+
+                            var loadSelected = innerHost.CreateButton("Load only selected", "Loads only the below selected particles, and overrides if any already exist.",
+                                clicked: (b) =>
+                                {
+                                    if(selectedParticles.Count == 0)
+                                    {
+                                        PopupInfoAction("Nothing selected", "No particles were selected...",
+                                            "Yes, load nothing", "Go back", (result) =>
+                                            {
+                                                if(result == MyGuiScreenMessageBox.ResultEnum.YES)
+                                                    screen.CloseScreen();
+                                            });
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            foreach(LoadParticleInfo pi in foundParticles)
+                                            {
+                                                if(selectedParticles.Contains(pi.OB.Id.SubtypeName))
+                                                {
+                                                    AddOrReplaceParticleOB(pi.OB);
+                                                }
+                                            }
+
+                                            FinalizeLoading();
+                                        }
+                                        catch(Exception e)
+                                        {
+                                            Log.Error(e);
+                                        }
+
+                                        screen.CloseScreen();
+                                    }
+                                });
+
+                            innerHost.PositionControls(invertSelection, loadSelected);
+
+                            Vector2 size = new Vector2(innerHost.PanelSize.X - innerHost.Padding.X * 2 - EyeballedScrollbarWidth, 0f);
+                            var scrollHost = new VerticalControlsHost(null, Vector2.Zero, size);
+                            var scrollPanel = innerHost.CreateScrollableArea(scrollHost.Panel, new Vector2(innerHost.PanelSize.X - innerHost.Padding.X * 2, 0.62f));
+
+                            innerHost.Add(scrollPanel);
+                            innerHost.PositionAndFillWidth(scrollPanel);
+
+                            scrollHost.Reset();
+
+                            foreach(LoadParticleInfo pi in foundParticles)
+                            {
+                                MyObjectBuilder_ParticleEffect particleOB = pi.OB;
+                                string name = particleOB.Id.SubtypeName;
+                                bool exists = MyParticleEffectsLibrary.Exists(name);
+
+                                MyGuiControlParent cbParent = scrollHost.InsertCheckbox($"{name}{(exists ? " (exists)" : "")}", $"From file: {pi.FileName}", false, (v) =>
+                                {
+                                    if(v)
+                                        selectedParticles.Add(name);
+                                    else
+                                        selectedParticles.Remove(name);
+                                });
+
+                                foreach(MyGuiControlBase control in cbParent.Controls)
+                                {
+                                    if(control is MyGuiControlCheckbox cb)
+                                    {
+                                        cb.UserData = name;
+                                        checkboxes.Add(cb);
+                                    }
+
+                                    if(control is MyGuiControlLabel label)
+                                    {
+                                        if(pi.Collides)
+                                            label.ColorMask = Color.Yellow;
+                                        else if(exists)
+                                            label.ColorMask = Color.Gray;
+                                    }
+                                }
+                            }
+
+                            EditorUI.FinalizeScrollable(scrollPanel, scrollHost.Panel, scrollHost);
+                        };
+
+                        screen.FinishSetup();
+
+                        MyGuiSandbox.AddScreen(screen);
                     }
                 }
                 catch(Exception e)
@@ -407,7 +642,7 @@ Tag: {data.Tag}";
                 }
             });
 
-            void LoadParticleFromOB(MyObjectBuilder_ParticleEffect particleOB)
+            void LoadSingleParticleFromOB(MyObjectBuilder_ParticleEffect particleOB)
             {
                 string name = particleOB.Id.SubtypeName;
 
@@ -426,12 +661,39 @@ Tag: {data.Tag}";
                 {
                     AddOrReplaceParticleOB(particleOB);
                 }
+
+                FinalizeLoading();
+            }
+
+            void FinalizeLoading()
+            {
+                if(lastLoadedData != null)
+                {
+                    SelectedParticle.Spawn(lastLoadedData.Name);
+                    SelectedParticle.ParentDistance = Math.Max(2f, EstimateParticleTotalRadius(lastLoadedData) * 0.6f);
+                    SelectedParticle.HasChanges = false;
+
+                    CheckForZeroViewDistance(lastLoadedData);
+
+                    ShowParticlePicker = false;
+                    Editor.Backup.ShouldBackup = false;
+                }
+
+                if(loadedCount > 0)
+                {
+                    Notifications.Show($"Loaded {loadedCount} particle effects. Selected: {lastLoadedData.Name}", 5);
+                }
+                else
+                {
+                    Notifications.Show("Loaded 0 particle effects.", 5, Color.Yellow);
+                }
+
+                RefreshUI();
             }
 
             void AddOrReplaceParticleOB(MyObjectBuilder_ParticleEffect particleOB)
             {
                 string name = particleOB.Id.SubtypeName;
-
                 bool existed = MyParticleEffectsLibrary.Exists(name);
 
                 if(existed)
@@ -464,16 +726,8 @@ Tag: {data.Tag}";
                 MyParticleEffectDataSerializer.DeserializeFromObjectBuilder(data, particleOB);
                 MyParticleEffectsLibrary.Add(data);
 
-                SelectedParticle.Spawn(data.Name);
-                SelectedParticle.ParentDistance = Math.Max(2f, EstimateParticleTotalRadius(data) * 0.6f);
-                SelectedParticle.HasChanges = false;
-
-                CheckForZeroViewDistance(data);
-
-                ShowParticlePicker = false;
-                Editor.Backup.ShouldBackup = false;
-
-                RefreshUI();
+                lastLoadedData = data;
+                loadedCount++;
             }
         }
 
@@ -522,7 +776,7 @@ Tag: {data.Tag}";
             if(data.DistanceMax <= 0)
             {
                 data.DistanceMax = DefaultData.DistanceMax;
-                Notifications.Show($"View distance was 0 or negative. Was reset to default: {data.DistanceMax}.", 5, Color.Yellow);
+                Notifications.Show($"Particle '{data.Name}' had ViewDistance 0 or negative. Was reset to default: {data.DistanceMax}.", 5, Color.Yellow);
             }
         }
 

@@ -17,8 +17,6 @@ namespace Digi.ParticleEditor
         VerticalControlsHost Host;
 
         ParticleHandler SelectedParticle => EditorUI.SelectedParticle;
-        MyGuiControlScrollablePanel ScrollablePanel => EditorUI.ScrollablePanel;
-        VerticalControlsHost ScrollHost => EditorUI.ScrollHost;
 
         MyGuiControlLabel ParticleMulLabel;
 
@@ -160,7 +158,7 @@ namespace Digi.ParticleEditor
                                  "\nVarious things that spawn particles can choose to use multipliers, this is where you can simulate them.");
                 Host.PositionAndFillWidth(label);
             }
-            
+
             void UserMultiplierSlider(string propName, Func<float> getter, Action<float> setter)
             {
                 PropId propId = new PropId(PropType.UserMultiplier, propName);
