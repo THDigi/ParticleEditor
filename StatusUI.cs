@@ -87,7 +87,7 @@ namespace Digi.ParticleEditor
                     SelectedParticle.UseParent = value;
                 });
 
-            MyGuiControlParent cbPivot = Host.InsertCheckbox("Pivot",
+            (MyGuiControlParent cbPivot, _, _) = Host.InsertCheckbox("Pivot",
                 "Draw the red/green/blue lines that indicate effect origin and orientation." +
                 "\nThe axis point towards the positive values of X/Y/Z, blue pointing back because -Z is forward in SE.",
                 DrawPivot, (value) =>
@@ -97,7 +97,7 @@ namespace Digi.ParticleEditor
 
             Host.UndoLastVerticalShift();
 
-            MyGuiControlParent cbEmitters = Host.InsertCheckbox("Emitters",
+            (MyGuiControlParent cbEmitters, _, _) = Host.InsertCheckbox("Emitters",
                 "Draw emitters' approximate position." +
                 "\nDoes not read it from render so it does not have the random variance.",
                 DrawEmitters, (value) =>
@@ -107,7 +107,7 @@ namespace Digi.ParticleEditor
 
             Host.UndoLastVerticalShift();
 
-            MyGuiControlParent cbLights = Host.InsertCheckbox("Lights",
+            (MyGuiControlParent cbLights, _, _) = Host.InsertCheckbox("Lights",
                 "Draw lights' approximate position." +
                 "\nDoes not read it from render so it does not have the random variance.",
                 DrawLights, (value) =>

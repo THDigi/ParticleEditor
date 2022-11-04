@@ -342,7 +342,7 @@ namespace Digi.ParticleEditor
             return checkbox;
         }
 
-        public MyGuiControlParent InsertCheckbox(string title, string tooltip, bool value, Action<bool> valueSet)
+        public (MyGuiControlParent, MyGuiControlCheckbox, MyGuiControlLabel) InsertCheckbox(string title, string tooltip, bool value, Action<bool> valueSet)
         {
             //MyGuiControlCheckbox checkbox = new MyGuiControlCheckbox(new Vector2(ITEM_HORIZONTAL_PADDING, 0), null, tooltip, value, MyGuiControlCheckboxStyleEnum.Debug, MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP);
             MyGuiControlCheckbox checkbox = new MyGuiControlCheckbox();
@@ -358,10 +358,12 @@ namespace Digi.ParticleEditor
             if(valueSet != null)
                 checkbox.IsCheckedChanged = (c) => valueSet.Invoke(c.IsChecked);
 
-            return CheckboxParent(checkbox, title, tooltip);
+            (MyGuiControlParent parent, MyGuiControlLabel label) = CheckboxParent(checkbox, title, tooltip);
+
+            return (parent, checkbox, label);
         }
 
-        public MyGuiControlParent Insert3StateCheckbox(string title, string tooltip, CheckStateEnum value, Action<CheckStateEnum> valueSet)
+        public (MyGuiControlParent, MyGuiControlIndeterminateCheckbox, MyGuiControlLabel) Insert3StateCheckbox(string title, string tooltip, CheckStateEnum value, Action<CheckStateEnum> valueSet)
         {
             MyGuiControlIndeterminateCheckbox checkbox = new MyGuiControlIndeterminateCheckbox();
             checkbox.State = value;
@@ -376,10 +378,12 @@ namespace Digi.ParticleEditor
             if(valueSet != null)
                 checkbox.IsCheckedChanged = (c) => valueSet.Invoke(c.State);
 
-            return CheckboxParent(checkbox, title, tooltip);
+            (MyGuiControlParent parent, MyGuiControlLabel label) = CheckboxParent(checkbox, title, tooltip);
+
+            return (parent, checkbox, label);
         }
 
-        MyGuiControlParent CheckboxParent(MyGuiControlBase checkbox, string title, string tooltip)
+        (MyGuiControlParent, MyGuiControlLabel) CheckboxParent(MyGuiControlBase checkbox, string title, string tooltip)
         {
             UIClickableLabel label = new UIClickableLabel(new Vector2(checkbox.Position.X + checkbox.Size.X + ControlSpacing, 0), null, title, null, 0.8f, "Debug",
                 MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_CENTER);
@@ -424,7 +428,7 @@ namespace Digi.ParticleEditor
 
             Add(parent);
             MoveY(height);
-            return parent;
+            return (parent, label);
         }
 
         public void InsertMultiSlider(string label, string tooltip, string[] names, float[] min, float[] max,

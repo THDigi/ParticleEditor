@@ -107,14 +107,14 @@ Also, particles of the same name share the same data so changes will affect it w
                 // HACK fix this control being weird
                 searchBar.Position = new Vector2(searchBar.Position.X + (searchBar.Size.X / 2f), searchBar.Position.Y + (searchBar.Size.Y / 2f));
 
-                MyGuiControlParent cbFilterLoop = Host.Insert3StateCheckbox("Loop", "Filter in/out looping particles.\nEmpty = don't filter.", FilterLoop, (state) =>
+                (MyGuiControlParent cbFilterLoop, _, _) = Host.Insert3StateCheckbox("Loop", "Filter in/out looping particles.\nEmpty = don't filter.", FilterLoop, (state) =>
                 {
                     FilterLoop = state;
                     RefreshParticlesList();
                 });
                 Host.UndoLastVerticalShift();
 
-                MyGuiControlParent cbFilterLastSeen = Host.InsertCheckbox("Last Seen", "Show only last seen particles in game world.", FilterSeen, (state) =>
+                (MyGuiControlParent cbFilterLastSeen, _, _) = Host.InsertCheckbox("Last Seen", "Show only last seen particles in game world.", FilterSeen, (state) =>
                 {
                     FilterSeen = state;
                     RefreshParticlesList();
@@ -602,7 +602,7 @@ Tag: {data.Tag}";
                                 string name = particleOB.Id.SubtypeName;
                                 bool exists = MyParticleEffectsLibrary.Exists(name);
 
-                                MyGuiControlParent cbParent = scrollHost.InsertCheckbox($"{name}{(exists ? " (exists)" : "")}", $"From file: {pi.FileName}", false, (v) =>
+                                (_, MyGuiControlCheckbox cb, MyGuiControlLabel label) = scrollHost.InsertCheckbox($"{name}{(exists ? " (exists)" : "")}", $"From file: {pi.FileName}", false, (v) =>
                                 {
                                     if(v)
                                         selectedParticles.Add(name);
@@ -610,22 +610,13 @@ Tag: {data.Tag}";
                                         selectedParticles.Remove(name);
                                 });
 
-                                foreach(MyGuiControlBase control in cbParent.Controls)
-                                {
-                                    if(control is MyGuiControlCheckbox cb)
-                                    {
-                                        cb.UserData = name;
-                                        checkboxes.Add(cb);
-                                    }
+                                cb.UserData = name;
+                                checkboxes.Add(cb);
 
-                                    if(control is MyGuiControlLabel label)
-                                    {
-                                        if(pi.Collides)
-                                            label.ColorMask = Color.Yellow;
-                                        else if(exists)
-                                            label.ColorMask = Color.Gray;
-                                    }
-                                }
+                                if(pi.Collides)
+                                    label.ColorMask = Color.Yellow;
+                                else if(exists)
+                                    label.ColorMask = Color.Gray;
                             }
 
                             EditorUI.FinalizeScrollable(scrollPanel, scrollHost.Panel, scrollHost);
