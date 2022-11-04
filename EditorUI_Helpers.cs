@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -10,6 +11,7 @@ using Digi.ParticleEditor.UIControls;
 using Sandbox;
 using Sandbox.Game.Gui;
 using Sandbox.Graphics.GUI;
+using VRage.FileSystem;
 using VRage.Game;
 using VRage.ObjectBuilders;
 using VRage.Render.Particles;
@@ -162,6 +164,22 @@ namespace Digi.ParticleEditor
             return attrib.Description;
         }
 
+        static IEnumerable<string> FileDialogPlaces()
+        {
+            // shows up in reverse order for some reason
+            yield return MyFileSystem.ContentPath;
+            yield return Path.Combine(MyFileSystem.UserDataPath, "ParticleEditor");
+            yield return MyFileSystem.ModsPath;
+        }
+
+        static Form GetMainForm()
+        {
+            if(Application.OpenForms.Count > 0)
+                return Application.OpenForms[0];
+            else
+                return new Form { TopMost = true };
+        }
+
         public static void FileDialog<TDialog>(string title, string directory, string filter, Action<string> callback) where TDialog : FileDialog, new()
         {
             Thread thread = new Thread(new ThreadStart(() =>
@@ -170,22 +188,17 @@ namespace Digi.ParticleEditor
                 {
                     using(TDialog dialog = new TDialog())
                     {
-                        if(directory != null && Directory.Exists(directory))
-                            dialog.InitialDirectory = directory;
-
                         dialog.Title = title;
                         dialog.Filter = filter;
                         dialog.RestoreDirectory = true;
                         dialog.AddExtension = true;
                         dialog.AutoUpgradeEnabled = true;
 
-                        Form GetMainForm()
-                        {
-                            if(Application.OpenForms.Count > 0)
-                                return Application.OpenForms[0];
-                            else
-                                return new Form { TopMost = true };
-                        }
+                        if(directory != null && Directory.Exists(directory))
+                            dialog.InitialDirectory = directory;
+
+                        foreach(string folder in FileDialogPlaces())
+                            dialog.CustomPlaces.Add(folder);
 
                         if(dialog.ShowDialog(GetMainForm()) == DialogResult.OK)
                         {
@@ -210,9 +223,6 @@ namespace Digi.ParticleEditor
                 {
                     using(OpenFileDialog dialog = new OpenFileDialog())
                     {
-                        if(directory != null && Directory.Exists(directory))
-                            dialog.InitialDirectory = directory;
-
                         dialog.Title = title;
                         dialog.Filter = filter;
                         dialog.RestoreDirectory = true;
@@ -220,13 +230,11 @@ namespace Digi.ParticleEditor
                         dialog.AutoUpgradeEnabled = true;
                         dialog.Multiselect = true;
 
-                        Form GetMainForm()
-                        {
-                            if(Application.OpenForms.Count > 0)
-                                return Application.OpenForms[0];
-                            else
-                                return new Form { TopMost = true };
-                        }
+                        if(directory != null && Directory.Exists(directory))
+                            dialog.InitialDirectory = directory;
+
+                        foreach(string folder in FileDialogPlaces())
+                            dialog.CustomPlaces.Add(folder);
 
                         if(dialog.ShowDialog(GetMainForm()) == DialogResult.OK)
                         {
