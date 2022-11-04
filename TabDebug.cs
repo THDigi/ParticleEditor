@@ -33,6 +33,7 @@ namespace Digi.ParticleEditor
 
             MySession.AfterLoading += SessionAfterLoading;
             MySession.OnUnloaded += SessionUnloading;
+            MyGuiSandbox.GuiControlRemoved += GuiControlRemoved;
 
             if(MySession.Static != null)
             {
@@ -44,6 +45,7 @@ namespace Digi.ParticleEditor
         {
             MySession.AfterLoading -= SessionAfterLoading;
             MySession.OnUnloaded -= SessionUnloading;
+            MyGuiSandbox.GuiControlRemoved -= GuiControlRemoved;
 
             RestoreConfigSettings();
         }
@@ -56,6 +58,18 @@ namespace Digi.ParticleEditor
         void SessionUnloading()
         {
             RestoreConfigSettings();
+        }
+
+        void GuiControlRemoved(object control)
+        {
+            if(control == null)
+                return;
+
+            if(control.ToString().EndsWith("ScreenOptionsSpace"))
+            {
+                // options menu closed, re-assign settings to restore to
+                GetConfigSettings();
+            }
         }
 
         void GetConfigSettings()
