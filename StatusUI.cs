@@ -73,13 +73,28 @@ namespace Digi.ParticleEditor
                     return (value < -0.5f ? "OFF" : Math.Max(0, value).ToString());
                 });
 
-            Host.InsertCheckbox("Show HUD",
+            (MyGuiControlParent cbShowHud, _, _) = Host.InsertCheckbox("Show HUD",
                 "Toggles if the game HUD is shown while this editor is open.",
                 ShowHUD, (value) =>
                 {
                     ShowHUD = value;
                     MyHud.MinimalHud = !ShowHUD;
                 });
+
+            Host.UndoLastVerticalShift();
+
+            (MyGuiControlParent cbShowParticleNames, _, _) = Host.InsertCheckbox("Other particle names",
+                "Show names of particles that you see in world." +
+                "\nHint: you can pause the game if they vanish too quickly" +
+                "\n        and use spectator camera to look around freely during pause too.",
+                EditorUI.Editor.LastSeenParticles.ShowLiveNames, (value) =>
+                {
+                    EditorUI.Editor.LastSeenParticles.ShowLiveNames = !EditorUI.Editor.LastSeenParticles.ShowLiveNames;
+                });
+
+            Host.UndoLastVerticalShift();
+
+            Host.PositionControlsNoSize(cbShowHud, cbShowParticleNames);
 
             (_, CbParentParticle, _) = Host.InsertCheckbox("Particle parented",
                 "Toggles particle parenting to character." +
