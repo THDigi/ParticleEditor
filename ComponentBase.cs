@@ -8,6 +8,12 @@
         protected readonly Editor Editor;
         protected EditorUI EditorUI => Editor.EditorUI;
 
+        /// <summary>
+        /// Makes component update even if editor is closed.
+        /// It will still not update if editor is unable to be opened anyway (MP games for example).
+        /// </summary>
+        public bool AlwaysUpdate { get; set; } = false;
+
         public EditorComponentBase(Editor editor)
         {
             Editor = editor;

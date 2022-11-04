@@ -9,6 +9,7 @@ using Sandbox.Graphics.GUI;
 using VRage.Game;
 using VRage.Input;
 using VRage.Render.Particles;
+using VRage.Utils;
 using VRageMath;
 using VRageRender;
 
@@ -203,7 +204,7 @@ namespace Digi.ParticleEditor
 
                     if(DrawEmitters || DrawLights)
                     {
-                        MyRenderProxy.DebugDrawText3D(worldMatrix.Translation, "Pivot", Color.White, TextScale, true, VRage.Utils.MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+                        MyRenderProxy.DebugDrawText3D(worldMatrix.Translation, "Pivot", Color.White, TextScale, true, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
                     }
 
                     if(DrawEmitters)
@@ -215,7 +216,7 @@ namespace Digi.ParticleEditor
                             m *= worldMatrix;
 
                             MyTransparentGeometry.AddPointBillboard(EditorUI.MaterialDot, new Color(5, 25, 45), m.Translation, PointRadius, 0, blendType: Blend);
-                            MyRenderProxy.DebugDrawText3D(m.Translation, emitter.Name, Color.SkyBlue, TextScale, true, VRage.Utils.MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+                            MyRenderProxy.DebugDrawText3D(m.Translation, emitter.Name, Color.SkyBlue, TextScale, true, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
                         }
                     }
 
@@ -230,7 +231,7 @@ namespace Digi.ParticleEditor
                             m *= worldMatrix;
 
                             MyTransparentGeometry.AddPointBillboard(EditorUI.MaterialDot, new Color(45, 25, 5), m.Translation, PointRadius, 0, blendType: Blend);
-                            MyRenderProxy.DebugDrawText3D(m.Translation, light.Name, new Color(255, 175, 30), TextScale, true, VRage.Utils.MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+                            MyRenderProxy.DebugDrawText3D(m.Translation, light.Name, new Color(255, 175, 30), TextScale, true, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
                         }
                     }
                 }
@@ -287,6 +288,8 @@ namespace Digi.ParticleEditor
                 IDictionary dict = effectsField?.GetValue(managerInstance) as IDictionary;
                 if(dict == null || dataField == null)
                     return;
+
+                // FIXME: dictionary can change while this iterates it, any way to threadsafe it?
 
                 object theEffectInstance = null;
                 foreach(object effectInstance in dict.Values)

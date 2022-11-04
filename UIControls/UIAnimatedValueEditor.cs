@@ -202,7 +202,7 @@ namespace Digi.ParticleEditor.UIControls
             int keys1D = SavedDataOB.Keys.Count;
             if(keys1D < PropInfo.RequiredKeys1D)
             {
-                Notifications.Show($"The vertical timeline has {keys1D} keys, should have at least {PropInfo.RequiredKeys1D}\nReason: {PropInfo.RequiredKeys1DTooltip ?? defaultReason}", 5, Color.Red);
+                Notifications.Show($"The vertical timeline has {keys1D} keys, should have at least {PropInfo.RequiredKeys1D}\nReason: {PropInfo.RequiredKeys1DReason ?? defaultReason}", 5, Color.Red);
                 //EditorUI.PopupConfirmation($"The vertical timeline has {keys1D} keys, should have at least {PropInfo.RequiredKeys1D} or it will crash the game!\nApply anyway?", () => DoApply(), focusOnNo: true);
                 return;
             }
@@ -212,7 +212,7 @@ namespace Digi.ParticleEditor.UIControls
                 int keys2Dmin = SavedDataOB.Keys.Min(k => k.Value2D.Keys.Count);
                 if(keys2Dmin < PropInfo.RequiredKeys2D)
                 {
-                    Notifications.Show($"One horizontal timeline has {keys2Dmin} keys, should have at least {PropInfo.RequiredKeys2D}\nReason: {PropInfo.RequiredKeys2DTooltip ?? defaultReason}", 5, Color.Red);
+                    Notifications.Show($"One horizontal timeline has {keys2Dmin} keys, should have at least {PropInfo.RequiredKeys2D}\nReason: {PropInfo.RequiredKeys2DReason ?? defaultReason}", 5, Color.Red);
                     //EditorUI.PopupConfirmation($"One horizontal timeline has {keys2Dmin} keys, should have at least {PropInfo.RequiredKeys2D} or it will crash the game!\nApply anyway?", () => DoApply(), focusOnNo: true);
                     return;
                 }

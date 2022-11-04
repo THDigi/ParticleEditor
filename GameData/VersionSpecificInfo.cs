@@ -104,7 +104,7 @@ namespace Digi.ParticleEditor.GameData
                 ValueRangeNum = new ValueInfo<float>(0f, 1000f, defaultValue: 0f),
                 RequiredKeys1D = 1,
                 RequiredKeys2D = 4,
-                RequiredKeys2DTooltip = "Requires 4 keys because otherwise it resets to 4 keys with 0 value on deserialization.",
+                RequiredKeys2DReason = "Requires 4 keys because otherwise it resets to 4 keys with 0 value on deserialization.",
 
                 // HACK: emitter.DeserializeFromObjectBuilder() does something special for Emissivity:
                 /*
@@ -465,7 +465,7 @@ namespace Digi.ParticleEditor.GameData
             [new PropId(PropType.General, nameof(EditorUI.DefaultData.ID))] = new PropertyData() // int
             {
                 TooltipFixup = EditorUI.GetDescriptionAttrib(typeof(MyParticleEffectData), nameof(EditorUI.DefaultData.ID)),
-                TooltipAddition = "Cannot change it directly in this editor. To keep things simpler it is set to the name's hashcode automatically.",
+                TooltipAddition = "To keep things simple this editor does not allow this to be manually edited, instead it is automatically generated from the name's hashcode.",
             },
 
             [new PropId(PropType.General, nameof(EditorUI.DefaultData.Name))] = new PropertyData() // string
@@ -611,36 +611,57 @@ namespace Digi.ParticleEditor.GameData
 
         static VersionSpecificInfo()
         {
-#if false
-            foreach(IMyConstProperty prop in EditorUI.DefaultEmitter.GetProperties())
-            {
-                var propId = new PropId(PropType.Emitter, prop.Name);
-                if(!PropertyInfo.ContainsKey(propId))
-                {
-                    MyAPIGateway.Utilities.ShowNotification($"[debug] Emnitter property '{prop.Name}' is not declared in PropertyInfo!", 5000);
-                }
-            }
+            //foreach(IMyConstProperty prop in EditorUI.DefaultEmitter.GetProperties())
+            //{
+            //    var propId = new PropId(PropType.Emitter, prop.Name);
+            //    if(!PropertyInfo.ContainsKey(propId))
+            //    {
+            //        Notifications.Show($"New unrecognized emnitter property '{prop.Name}'!", 10, Color.Yellow);
+            //    }
+            //}
 
-            foreach(IMyConstProperty prop in EditorUI.DefaultLight.GetProperties())
-            {
-                var propId = new PropId(PropType.Light, prop.Name);
-                if(!PropertyInfo.ContainsKey(propId))
-                {
-                    MyAPIGateway.Utilities.ShowNotification($"[debug] Light property '{prop.Name}' is not declared in PropertyInfo!", 5000);
-                }
-            }
-#endif
+            //foreach(IMyConstProperty prop in EditorUI.DefaultLight.GetProperties())
+            //{
+            //    var propId = new PropId(PropType.Light, prop.Name);
+            //    if(!PropertyInfo.ContainsKey(propId))
+            //    {
+            //        Notifications.Show($"New unrecognized light property '{prop.Name}'!", 10, Color.Yellow);
+            //    }
+            //}
         }
     }
 
     public class PropertyData
     {
+        /// <summary>
+        /// Silently overrides the name.
+        /// </summary>
         public string NameOverride;
+
+        /// <summary>
+        /// Shown only if original name and override are empty/null.
+        /// </summary>
         public string NameFallback;
 
-        public string TooltipOverride;
+        /// <summary>
+        /// Silently overrides tooltip, use for retrieving original tooltip from other sources.
+        /// </summary>
         public string TooltipFixup;
+
+        /// <summary>
+        /// Overrides tooltip and it is mentioned that the tooltip is overridden.
+        /// </summary>
+        public string TooltipOverride;
+
+        /// <summary>
+        /// Only shows this tooltip if the other tooltips are null/empty. (except <see cref="TooltipAddition"/> which is always appended.)
+        /// It is mentioned that this is a fallback tooltip once it is visible.
+        /// </summary>
         public string TooltipFallback;
+
+        /// <summary>
+        /// Extra info that is always added at the end of the existing tooltip, with the "Extra info" prefix.
+        /// </summary>
         public string TooltipAddition;
 
         /// <summary>
@@ -648,17 +669,27 @@ namespace Digi.ParticleEditor.GameData
         /// Only for animated 1D & 2D properties.
         /// </summary>
         public int RequiredKeys1D = 1;
-        public string RequiredKeys1DTooltip;
+
+        /// <summary>
+        /// Reason mentioned as to why it requires keys mentioned in <see cref="RequiredKeys1D"/>. If empty/null then it will print "it can crash the game".
+        /// </summary>
+        public string RequiredKeys1DReason;
 
         /// <summary>
         /// Keys on 2nd dimmension required to not crash the game.
         /// Only for animated 2D properties.
         /// </summary>
         public int RequiredKeys2D = 1;
-        public string RequiredKeys2DTooltip;
+
+        /// <summary>
+        /// Reason mentioned as to why it requires keys mentioned in <see cref="RequiredKeys2D"/>. If empty/null then it will print "it can crash the game".
+        /// </summary>
+        public string RequiredKeys2DReason;
 
         public ValueInfo<float> ValueRangeNum = new ValueInfo<float>(-1f, 1f);
+
         public ValueInfo<Vector3> ValueRangeVector3 = new ValueInfo<Vector3>(-Vector3.One, Vector3.One);
+
         public ValueInfo<Vector4> ValueRangeVector4 = new ValueInfo<Vector4>(-Vector4.One, Vector4.One);
 
         public string GetTooltip()

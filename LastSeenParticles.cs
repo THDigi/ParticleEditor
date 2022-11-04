@@ -10,6 +10,7 @@ namespace Digi.ParticleEditor
 
         public LastSeenParticles(Editor editor) : base(editor)
         {
+            AlwaysUpdate = true;
             MySession.AfterLoading += SessionLoaded;
         }
 

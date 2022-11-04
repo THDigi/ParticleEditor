@@ -28,6 +28,8 @@ namespace Digi.ParticleEditor
             }
         }
 
+        public bool CanShowEditor => MySession.Static.IsServer && MySession.Static.OnlineMode == MyOnlineModeEnum.OFFLINE;
+
         public event Action<bool> EditorVisibleChanged;
 
         public readonly EditorUI EditorUI;
@@ -114,7 +116,7 @@ namespace Digi.ParticleEditor
 
             bool inMenu = MySandboxGame.Static.IsCursorVisible || (MyAPIGateway.Gui?.ChatEntryVisible ?? false);
 
-            if(!MySession.Static.IsServer || MySession.Static.OnlineMode != MyOnlineModeEnum.OFFLINE)
+            if(!CanShowEditor)
             {
                 if(!inMenu && MyInput.Static.IsNewKeyPressed(MyKeys.F) && MyInput.Static.IsAnyShiftKeyPressed())
                     MyAPIGateway.Utilities.ShowNotification("Partile Editor only allowed in offline worlds", 3000, MyFontEnum.Red);
@@ -137,13 +139,14 @@ namespace Digi.ParticleEditor
             {
                 // prevent goodbot and other stuff from showing up...
                 MyHud.Questlog.Visible = false;
+            }
 
-                foreach(EditorComponentBase comp in Components.Values)
+            foreach(EditorComponentBase comp in Components.Values)
+            {
+                if(ShowEditor || comp.AlwaysUpdate)
                 {
                     comp.Update();
                 }
-
-                //EditorUI.Update();
             }
         }
 
