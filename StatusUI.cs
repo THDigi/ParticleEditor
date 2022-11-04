@@ -36,6 +36,8 @@ namespace Digi.ParticleEditor
         MyGuiControlLabel LabelElapsedTime;
         MyGuiControlLabel LabelLoopTime;
 
+        MyGuiControlCheckbox CbParentParticle;
+
         public StatusUI(EditorUI editorUI)
         {
             EditorUI = editorUI;
@@ -78,7 +80,7 @@ namespace Digi.ParticleEditor
                     MyHud.MinimalHud = !ShowHUD;
                 });
 
-            Host.InsertCheckbox("Particle parented",
+            (_, CbParentParticle, _) = Host.InsertCheckbox("Particle parented",
                 "Toggles particle parenting to character." +
                 "\nAffects some things, like gravity awareness in lights." +
                 "\nHotkey: R",
@@ -144,6 +146,8 @@ namespace Digi.ParticleEditor
                 if(canReadInputs && MyInput.Static.IsNewKeyPressed(MyKeys.R))
                 {
                     SelectedParticle.UseParent = !SelectedParticle.UseParent;
+
+                    CbParentParticle.IsChecked = SelectedParticle.UseParent; // update in GUI
                 }
 
 
