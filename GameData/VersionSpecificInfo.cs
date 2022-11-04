@@ -504,10 +504,11 @@ namespace Digi.ParticleEditor.GameData
             [new PropId(PropType.General, nameof(EditorUI.DefaultData.Priority))] = new PropertyData() // float
             {
                 NameFallback = "Priority",
-                TooltipOverride = "Determines the importance of rendering this particle (lower means more important)." +
-                                  "\nThis only comes into effect if there's more than 1024 emitters in world, to determine which ones to keep rendering." +
-                                  "\nIt sorts them incrementally by distance to camera multiplied by Priority, then uses the first 1024 of that sorted list to render." +
-                                  "\nNOTE: it's stored squared in a float field, should not be less than -1e19 or more than 1e19.",
+                TooltipOverride = "Determines the importance of this particle's emitters when the game reaches its 1024 limit on emitters." +
+                                  // references: MyGPUEmitter.CompareTo(), MyGPUEmitters.Gather() 
+                                  "\nDistance to camera multiplied by Priority is used to sort emitters incrementally, then only the first 1024 of that sorted list are rendered." +
+                                  "\nRecommended to be left at 1 for most particles. Only gigantic (moon+ sized) should use lower values, down to 0." +
+                                  "\nNOTE: it's stored squared in a float field, therefore should not be less than -1e19 or more than 1e19.",
                 ValueRangeNum = new ValueInfo<float>(-1e19f, 1e19f),
             },
 
