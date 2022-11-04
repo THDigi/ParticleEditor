@@ -107,6 +107,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FieldAccess.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LastSeenParticles.cs" />
     <Compile Include="ComponentBase.cs" />

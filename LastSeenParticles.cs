@@ -16,10 +16,9 @@ namespace Digi.ParticleEditor
     public class LastSeenParticles : EditorComponentBase
     {
         public bool ShowLiveNames { get; set; } = false;
-
         public readonly Dictionary<string, int> Recent = new Dictionary<string, int>();
 
-        FieldInfo Field_State;
+        Func<MyParticleEffect, MyParticleEffectState> StateGetter;
         StringBuilder SB = new StringBuilder(512);
 
         public LastSeenParticles(Editor editor) : base(editor)
@@ -29,7 +28,9 @@ namespace Digi.ParticleEditor
 
             try
             {
-                Field_State = typeof(MyParticleEffect).GetField("m_state", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+                FieldInfo field = typeof(MyParticleEffect).GetField("m_state", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+
+                StateGetter = FieldAccess.CreateGetter<MyParticleEffect, MyParticleEffectState>(field);
             }
             catch(Exception e)
             {
@@ -59,10 +60,11 @@ namespace Digi.ParticleEditor
 
                 Recent[effect.Data.Name] = tick;
 
-                if(ShowLiveNames && Field_State != null)
+                if(ShowLiveNames && StateGetter != null)
                 {
                     Vector3D worldPos = effect.WorldMatrix.Translation;
-                    MyParticleEffectState state = (MyParticleEffectState)Field_State.GetValue(effect);
+                    MyParticleEffectState state = StateGetter.Invoke(effect);
+
                     uint parentId = state.ParentID;
                     double distance = 0;
 
