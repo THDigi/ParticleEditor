@@ -40,6 +40,7 @@ namespace Digi.ParticleEditor
 
         public Notifications(Editor editor) : base(editor)
         {
+            AlwaysUpdate = true;
             Instance = this;
 
             MySession.OnUnloaded += SessionUnloaded;

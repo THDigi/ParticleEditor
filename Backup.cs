@@ -6,10 +6,8 @@ using Sandbox;
 using Sandbox.Engine.Platform.VideoMode;
 using Sandbox.Game.World;
 using Sandbox.Graphics;
-using Sandbox.ModAPI;
 using VRage.FileSystem;
 using VRage.Game;
-using VRage.ObjectBuilders;
 using VRage.Render.Particles;
 using VRage.Utils;
 using VRageMath;
@@ -53,6 +51,8 @@ namespace Digi.ParticleEditor
 
         public Backup(Editor editor) : base(editor)
         {
+            AlwaysUpdate = true;
+
             Editor.EditorUI.SelectedParticle.EditsMade += SelectedParticle_ChangesMade;
 
             Editor.EditorVisibleChanged += EditorVisibleChanged;
