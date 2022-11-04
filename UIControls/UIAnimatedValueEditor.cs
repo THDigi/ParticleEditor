@@ -1192,6 +1192,17 @@ namespace Digi.ParticleEditor.UIControls
                 }
             };
 
+            timeline.GetValueType = () =>
+            {
+                switch(SavedDataOB.Type)
+                {
+                    case "Vector3": return typeof(Vector3);
+                    case "Vector4": return typeof(Vector4);
+                    case "Float": return typeof(float);
+                    default: return null;
+                }
+            };
+
             timeline.FinishSetup();
             ScrollHost.Add(timeline);
             return timeline;

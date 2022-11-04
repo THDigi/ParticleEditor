@@ -31,6 +31,7 @@ namespace Digi.ParticleEditor.UIControls
         public Func<float, int, int, object> GetInterpolatedValue;
         public Func<int, float, Vector4> CustomKeyColor;
         public Func<int, string> GetKeyTooltip;
+        public Func<Type> GetValueType;
 
         string GeneralTooltip;
 
@@ -236,6 +237,12 @@ namespace Digi.ParticleEditor.UIControls
             if(AddKey == null)
                 return;
 
+            if(GetValueType == null || Clipboard.GetType() != GetValueType.Invoke())
+            {
+                Notifications.Show($"Cannot paste a '{Clipboard.GetType()}' type onto timeline's '{(GetValueType?.Invoke()?.ToString() ?? "(unknown)")}' type.", 3, Color.Red);
+                return;
+            }
+
             float time = MathHelper.Clamp(MouseOnTimeline, 0, 1);
             Key createdKey = new Key(time);
             Keys.Add(createdKey);
@@ -285,7 +292,12 @@ namespace Digi.ParticleEditor.UIControls
             if(Clipboard == null)
             {
                 Notifications.Show("Clipboard is empty, nothing to paste.", 3, Color.Red);
-                //EditorUI.PopupInfo("Clipboard empty", "Clipboard is empty, nothing to paste.", MyMessageBoxStyleEnum.Info);
+                return;
+            }
+
+            if(GetValueType == null || Clipboard.GetType() != GetValueType.Invoke())
+            {
+                Notifications.Show($"Cannot paste a '{Clipboard.GetType()}' type onto timeline's '{(GetValueType?.Invoke()?.ToString() ?? "(unknown)")}' type.", 3, Color.Red);
                 return;
             }
 
