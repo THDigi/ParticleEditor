@@ -413,7 +413,7 @@ namespace Digi.ParticleEditor.UIControls
                         int index = Keys.IndexOf(AimedKey);
                         if(index != -1)
                         {
-                            string text = $"Ratio: {AimedKey.Position:0.#####} (of particle lifetime)";
+                            string text = $"At particle lifetime: {Math.Round(AimedKey.Position * 100, 2)}%";
 
                             if(GetKeyTooltip != null)
                                 text += "\n" + GetKeyTooltip.Invoke(index);
@@ -422,7 +422,7 @@ namespace Digi.ParticleEditor.UIControls
                                 text += "\n" + GeneralTooltip;
 
                             if(MyInput.Static.IsLeftMousePressed())
-                                text += "\n\n(Hold ctrl to round to 2)"; // TODO: add this on various other sliders
+                                text += "\n\n(Hold ctrl to round to integer percentages)"; // TODO: add this on various other sliders
 
                             SetToolTip(text);
                             useGeneral = false;
@@ -514,7 +514,7 @@ namespace Digi.ParticleEditor.UIControls
                 Vector2 mousePos = MyGuiManager.MouseCursorPosition;
 
                 const string font = "Debug";
-                string text = MovingKey.Position.ToString();
+                string text = $"{Math.Round(MovingKey.Position * 100, 2)}%";
                 float textScale = 0.8f * OverallScale;
                 Vector2 textSize = MyGuiManager.MeasureString(font, text, textScale);
 

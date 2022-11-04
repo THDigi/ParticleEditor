@@ -106,7 +106,7 @@ namespace Digi.ParticleEditor.UIControls
             string help = $"Hold RMB and drag horizontally to adjust.\nWhile dragging, hold Ctrl to round to {DragRound / 2}\nPress C to clear the text box.";
 
             if(DefaultValue.HasValue)
-                help = $"Original value: {DefaultValue.Value} (press D to reset to this)\n\n{help}";
+                help = $"Default value: {DefaultValue.Value} (press D to reset to this)\n\n{help}";
 
             if(tooltip != null)
                 SetToolTip($"{tooltip}\n\n{help}");
