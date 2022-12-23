@@ -6,6 +6,7 @@ using Sandbox;
 using Sandbox.Engine.Platform.VideoMode;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
+using VRage.Utils;
 using VRageMath;
 using VRageRender;
 
@@ -23,69 +24,27 @@ namespace Digi.ParticleEditor
         public float? ParticleEmitterMultiplier => _particleEmitterMultiplier?.Invoke();
         Func<float> _particleEmitterMultiplier;
 
-        bool Restore_PostProcessing;
-        MyRenderQualityEnum? Restore_ShaderQuality;
-
         public EditorDebug(EditorUI editorUI)
         {
             EditorUI = editorUI;
             FindParticlesMultiplierProperty();
 
-            MySession.AfterLoading += SessionAfterLoading;
             MySession.OnUnloaded += SessionUnloading;
-            MyGuiSandbox.GuiControlRemoved += GuiControlRemoved;
-
-            if(MySession.Static != null)
-            {
-                SessionAfterLoading();
-            }
         }
 
         public void Dispose()
         {
-            MySession.AfterLoading -= SessionAfterLoading;
             MySession.OnUnloaded -= SessionUnloading;
-            MyGuiSandbox.GuiControlRemoved -= GuiControlRemoved;
-
-            RestoreConfigSettings();
-        }
-
-        void SessionAfterLoading()
-        {
-            GetConfigSettings();
         }
 
         void SessionUnloading()
         {
-            RestoreConfigSettings();
-        }
-
-        void GuiControlRemoved(object control)
-        {
-            if(control == null)
-                return;
-
-            if(control.ToString().EndsWith("ScreenOptionsSpace"))
+            MyRenderQualityEnum? quality = MySandboxGame.Config?.ShaderQuality;
+            if(quality != null && MyVideoSettingsManager.CurrentGraphicsSettings.PerformanceSettings.RenderSettings.ParticleQuality != quality.Value)
             {
-                // options menu closed, re-assign settings to restore to
-                GetConfigSettings();
+                SetParticleQuality(quality.Value);
+                MyLog.Default.WriteLine($"ParticleEditor: Set particle quality back to {quality.Value}");
             }
-        }
-
-        void GetConfigSettings()
-        {
-            Restore_PostProcessing = MySandboxGame.Config.PostProcessingEnabled;
-            Restore_ShaderQuality = MySandboxGame.Config.ShaderQuality;
-
-            MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
-            graphicsSettings.PostProcessingEnabled = Restore_PostProcessing;
-            MyVideoSettingsManager.Apply(graphicsSettings);
-        }
-
-        void RestoreConfigSettings()
-        {
-            MySandboxGame.Config.PostProcessingEnabled = Restore_PostProcessing;
-            MySandboxGame.Config.ShaderQuality = Restore_ShaderQuality;
         }
 
         void FindParticlesMultiplierProperty()
@@ -99,54 +58,57 @@ namespace Digi.ParticleEditor
             }
         }
 
+        void SetParticleQuality(MyRenderQualityEnum quality)
+        {
+            MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
+            graphicsSettings.PerformanceSettings.RenderSettings.ParticleQuality = quality;
+            MyVideoSettingsManager.Apply(graphicsSettings);
+
+            // shader qualtiy in config is being set by voxel shading quality so this is no concern of being changed permanently.
+            // it does however persist for the duration of the game so needs to be reset on world unload.
+            // it also gets reset if graphics options menu is opened and OK is pressed.
+        }
+
         public void RecreateControls(VerticalControlsHost host)
         {
             Host = host;
 
             //Host.PositionAndFillWidth(Host.CreateLabel("Debug"));
 
-            MyGuiControlLabel shaderQualityLabel = Host.CreateLabel("Temporarily change particle quality:");
-            shaderQualityLabel.SetToolTip("To preview how the particle looks at various graphics settings.\nThis setting is affected by Shader Quality in the game's graphics UI.");
+            MyGuiControlLabel shaderQualityLabel = Host.CreateLabel("Temporarily change global particle quality:");
+            shaderQualityLabel.SetToolTip("This particle quality setting is hidden and affected by game's Shader Quality." +
+                "\nThe below buttons' changes will only last until world unload and do not get saved to game config." +
+                "\nAlso gets reset if you go to graphics options UI and click OK.");
             Host.PositionAndFillWidth(shaderQualityLabel);
 
-            string tooltipExtra = "This does not save to config.";
-
-            // NOTE: ParticleQuality does not get saved to config, it gets set from VoxelShaderQuality instead.
+            string tooltipExtra = null;
 
             MyGuiControlButton buttonLow = Host.CreateButton("Low", tooltipExtra, clicked: (button) =>
             {
-                MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
-                graphicsSettings.PerformanceSettings.RenderSettings.ParticleQuality = MyRenderQualityEnum.LOW;
-                MyVideoSettingsManager.Apply(graphicsSettings);
+                SetParticleQuality(MyRenderQualityEnum.LOW);
             });
 
             MyGuiControlButton buttonMed = Host.CreateButton("Medium", tooltipExtra, clicked: (button) =>
             {
-                MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
-                graphicsSettings.PerformanceSettings.RenderSettings.ParticleQuality = MyRenderQualityEnum.NORMAL;
-                MyVideoSettingsManager.Apply(graphicsSettings);
+                SetParticleQuality(MyRenderQualityEnum.NORMAL);
             });
 
             MyGuiControlButton buttonHigh = Host.CreateButton("High", tooltipExtra, clicked: (button) =>
             {
-                MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
-                graphicsSettings.PerformanceSettings.RenderSettings.ParticleQuality = MyRenderQualityEnum.HIGH;
-                MyVideoSettingsManager.Apply(graphicsSettings);
+                SetParticleQuality(MyRenderQualityEnum.HIGH);
             });
 
             MyGuiControlButton buttonExtreme = Host.CreateButton("Extreme", tooltipExtra, clicked: (button) =>
             {
-                MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
-                graphicsSettings.PerformanceSettings.RenderSettings.ParticleQuality = MyRenderQualityEnum.EXTREME;
-                MyVideoSettingsManager.Apply(graphicsSettings);
+                SetParticleQuality(MyRenderQualityEnum.EXTREME);
             });
 
             Host.PositionControls(buttonLow, buttonMed, buttonHigh, buttonExtreme);
 
             ParticleMulLabel = Host.CreateLabel("Particle emitter multiplier: (unknown)");
-            ParticleMulLabel.SetToolTip("Affects how many particles are spawned by every particle effect's emitter." +
-                                        "\nAffected by graphics options' Shader Quality (which you can temporarily change with the buttons above)." +
-                                        "\n\nThe unknown value means this plugin was not able to read it because SE code got changed." +
+            ParticleMulLabel.SetToolTip("This is what ultimately affects all particles' spawn-rate." +
+                                        "\nThis gets set by Particle Quality (buttons above) which is in turn set by game's Shader Quality in graphics options UI." +
+                                        "\n\nIf it shows up as '(unknown)' it means this plugin was not able to read it because SE code got changed." +
                                         "\nYou can still try the buttons above and visually inspect if particles are being reduced.");
             Host.PositionAndFillWidth(ParticleMulLabel);
 
@@ -154,12 +116,17 @@ namespace Digi.ParticleEditor
 
             Host.InsertSeparator();
 
-            Host.InsertCheckbox("Render post processing", "Temporarily toggle post processing, gets reset to config value on world unload.",
+            Host.InsertCheckbox("Post-processing", "This is a shortcut for the post processing toggle from graphics options UI.\nNOTE: gets saved to game config, remember to undo it.",
                 MyVideoSettingsManager.CurrentGraphicsSettings.PostProcessingEnabled, (value) =>
                 {
                     MyGraphicsSettings graphicsSettings = MyVideoSettingsManager.CurrentGraphicsSettings;
                     graphicsSettings.PostProcessingEnabled = value;
                     MyVideoSettingsManager.Apply(graphicsSettings);
+
+                    // the above setting gets read and written to config at unknown times... might as well make it official:
+
+                    MySandboxGame.Config.PostProcessingEnabled = value;
+                    MySandboxGame.Config.Save();
                 });
 
 
