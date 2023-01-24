@@ -63,11 +63,11 @@ Also, particles of the same name share the same data so changes will affect it w
                     "\nRemember that all particle changes, including new ones, are only in-memory. You need to export them to .sbc to keep them.",
                     clicked: (b) =>
                     {
-                        string name = $"New Particle {CreatedParticles}";
+                        string generatedName = $"New Particle {CreatedParticles}";
 
-                        NamePrompt = new ValueGetScreenWithCaption($"Create particle", name, (text) =>
+                        NamePrompt = new ValueGetScreenWithCaption($"Create particle", generatedName, (newName) =>
                         {
-                            return CreateParticle(text);
+                            return CreateParticle(newName);
                         });
                         MyGuiSandbox.AddScreen(NamePrompt);
                     });
@@ -141,11 +141,11 @@ Also, particles of the same name share the same data so changes will affect it w
                             return;
 
                         string copyFrom = (string)ParticlesListbox.SelectedItems[0].UserData;
-                        string name = $"Copy of {copyFrom}";
+                        string generatedName = $"Copy of {copyFrom}";
 
-                        NamePrompt = new ValueGetScreenWithCaption($"Duplicate particle", name, (text) =>
+                        NamePrompt = new ValueGetScreenWithCaption($"Duplicate particle", generatedName, (newName) =>
                         {
-                            return CreateParticle(name, copyFrom);
+                            return CreateParticle(newName, copyFrom);
                         });
                         MyGuiSandbox.AddScreen(NamePrompt);
                     });
