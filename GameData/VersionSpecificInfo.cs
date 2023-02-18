@@ -37,11 +37,17 @@ namespace Digi.ParticleEditor.GameData
         }
 
         public const string AnimatedProp1DHelp = "Animated properties (1D) are over the effect's total elapsed time." +
-                                                 "\nMost properties can function with just one vertical key.";
+                                                 "\nMost properties can function with just one key." +
+                                                 AnimatedPropApplyHint;
 
-        public const string AnimatedProp2DHelp = "2D animated properties are verticaly over the effect's total elapsed time and horizontally over individual particle's life." +
-                                                 "\nTime on the horizontal axis is always 0 to 1 as the ratio for the particle's total life." +
-                                                 "\nMost need at least 2 keys on the horizontal line to properly get data, 3 to get interpolation and 4 is pretty much maximum.";
+        public const string AnimatedProp2DHelp = "2D animated properties are over 2 different timelines, speaking in terms of UI arrangement:" +
+                                                 "\nVertical keys's Time is effect's total elapsed time (likely affected by min/max Duration in General tab)." +
+                                                 "\nHorizontally, to the right of each key, is on each particle's life, and it always ranges from 0 to 1 as the ratio of particle's life." +
+                                                 "\n" +
+                                                 "\nMost need at least 2 keys on the horizontal line to properly get data, 3 to get interpolation and 4 is pretty much maximum." +
+                                                 AnimatedPropApplyHint;
+
+        const string AnimatedPropApplyHint = "\n\nPress the Apply button after you've done changes in order to see them.";
 
         public static PropertyData DefaultPropInfo = new PropertyData(); // NOTE: don't edit these here, edit'em in the class declaration!
 

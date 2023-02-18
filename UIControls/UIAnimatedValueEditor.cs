@@ -35,7 +35,20 @@ namespace Digi.ParticleEditor.UIControls
         bool FocusOnDropDown;
 
         GenerationProperty SavedDataOB;
-        bool ChangesMade = false;
+
+        MyGuiControlButton _applyButton;
+        bool _changesMade = false;
+        bool ChangesMade
+        {
+            get => _changesMade;
+            set
+            {
+                if(_applyButton != null)
+                    _applyButton.ColorMask = value ? Color.Lime : Color.White;
+
+                _changesMade = value;
+            }
+        }
 
         Dictionary<int, bool> SingleValueMode = new Dictionary<int, bool>();
 
@@ -126,7 +139,7 @@ namespace Digi.ParticleEditor.UIControls
             //MyGuiControlButton xmlButton = Host.SideXmlButton(PropId, GetProp());
             //xmlButton.Size = new Vector2(0.05f, xmlButton.Size.Y);
 
-            MyGuiControlButton applyButton = Host.CreateButton("Apply", "Applies changes without closing window.", clicked: (b) =>
+            _applyButton = Host.CreateButton("Apply", "Applies changes without closing window.", clicked: (b) =>
             {
                 ApplyChanges();
             });
@@ -158,7 +171,7 @@ namespace Digi.ParticleEditor.UIControls
                 }
             });
 
-            applyButton.Size = new Vector2(0.1f, applyButton.Size.Y);
+            _applyButton.Size = new Vector2(0.1f, _applyButton.Size.Y);
             resizeButton.Size = new Vector2(0.1f, resizeButton.Size.Y);
             closeButton.Size = new Vector2(0.1f, closeButton.Size.Y);
 
@@ -167,7 +180,7 @@ namespace Digi.ParticleEditor.UIControls
 
             //Host.StackRight(xmlButton, spacer, applyButton, resizeButton, closeButton);
 
-            Host.StackRight(applyButton, resizeButton, closeButton);
+            Host.StackRight(_applyButton, resizeButton, closeButton);
 
             Host.UndoLastVerticalShift();
 
@@ -193,6 +206,8 @@ namespace Digi.ParticleEditor.UIControls
             Host.PositionAndFillWidth(ScrollablePanel);
 
             Controls.Add(ContextMenu);
+
+            ChangesMade = ChangesMade; // update button's color when UI gets re-created
         }
 
         void ApplyChanges(bool refreshUI = true)
@@ -343,8 +358,8 @@ namespace Digi.ParticleEditor.UIControls
                 MyGuiControlLabel timeLabel = ScrollHost.CreateLabel("Time:");
 
                 UINumberBox timeControl = ScrollHost.CreateNumberBox(
-                    "Time on the total effect lifetime axis (vertical in this UI)." +
-                    "\nValues from 0 to particle duration.",
+                    "Time at which the value(s) on the right will be used." +
+                    "\nRanges from 0 to particle duration.",
                     time, 0, 0, float.MaxValue, inputRound: 6, dragRound: 2, changed: (value) =>
                     {
                         AnimationKey key = SavedDataOB.Keys[index];
