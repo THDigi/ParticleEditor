@@ -119,7 +119,7 @@ namespace Digi.ParticleEditor
             if(!CanShowEditor)
             {
                 if(!inMenu && MyInput.Static.IsNewKeyPressed(MyKeys.F) && MyInput.Static.IsAnyShiftKeyPressed())
-                    MyAPIGateway.Utilities.ShowNotification("Partile Editor only allowed in offline worlds", 3000, MyFontEnum.Red);
+                    MyAPIGateway.Utilities.ShowNotification("Particle Editor only allowed in offline worlds", 3000, MyFontEnum.Red);
 
                 if(ShowEditor)
                     CloseEditor();
