@@ -378,6 +378,9 @@ namespace Digi.ParticleEditor
                             VRageRender.MyTransparentMaterial mat = emitter.Material.GetValue();
                             string label;
                             int frames = emitter.ArrayModulo.GetValue();
+                            if(frames == 0)
+                                frames = 1; // HACK: 0 is also supported and works as 1 frame, because of how they use this in bitwise math
+
                             if(VersionSpecificInfo.IsMaterialSupported(mat))
                                 label = $"Material: {mat.Id.String}  (using {frames} {(frames == 1 ? "frame" : "frames")})";
                             else

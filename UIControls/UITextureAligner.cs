@@ -190,6 +190,13 @@ namespace Digi.ParticleEditor.UIControls
                 int offset = Emitter.ArrayOffset.GetValue();
                 int cells = Emitter.ArrayModulo.GetValue();
 
+                // HACK: because of how these 2 values are used by game code (with bitwise math that I don't understand), you can have modulo be set to 0 and offset be +1 and it'll work.
+                if(cells == 0)
+                {
+                    cells = 1;
+                    offset -= 1;
+                }
+
                 // from \Shaders\Transparent\GPUParticles\Globals.hlsl
                 //   uvw.x = float(imgOffset % dimX) / dimX + uvOffset.x / dimX;
                 //   uvw.y = float(imgOffset / dimX) / dimY + uvOffset.y / dimY;
