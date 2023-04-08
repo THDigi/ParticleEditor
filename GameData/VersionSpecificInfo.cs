@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using VRage.Game;
 using VRage.Render.Particles;
 using VRageMath;
@@ -14,26 +13,22 @@ namespace Digi.ParticleEditor.GameData
     {
         public const uint NoParentId = uint.MaxValue;
 
-        // from MyDefinitionManager.CreateTransparentMaterials()
-        public const string MaterialComboBoxTooltipAddition = "\n\nNOTE: The game has some strict restrictions on what materials work for particles:" +
-                                                              "\n- Material's texture file name must start with 'Atlas_', case sensitive;" +
-                                                              "\n- Material's texture must be exactly 8192 x 8192 pixels;" +
-                                                              "\n- Material must have TextureType set to FileTexture (or undeclared as it is default).";
-
         public const string ColorSlidersTooltip = "Values between 0 and 1 for normal ranges, can go past 1 to cause bloom.";
 
-        // HACK: MyDefinitionManager.CreateTransparentMaterials() does this check before giving texture to renderer (MyGPUEmitters)
-        // HACK: also game somewhere requires these textures to be exactly 8192x8192 otherwise they're pink
+        // HACK: MyDefinitionManager.CreateTransparentMaterials() checks for Atlas_ prefix but then MyGPUEmitters.UpdateTexture() goes around the check when particle is marked dirty.
+        // HACK: also game somewhere requires these textures to be exactly 8192x8192 otherwise they're pink, couldn't find where.
+
+        public const string MaterialComboBoxTooltipAddition = "\n\nNOTE: The game requires particle texture to be exactly 8192 x 8192 pixels!" +
+                                                              "\nAlso recommended for the texture file name to start with 'Atlas_' prefix to avoid some potential edge case issues.";
+
         public static bool IsMaterialSupported(MyTransparentMaterial mat)
         {
-            if(mat.TextureType == MyTransparentMaterialTextureType.FileTexture && !string.IsNullOrEmpty(mat.Texture) && Path.GetFileNameWithoutExtension(mat.Texture).StartsWith("Atlas_"))
-            {
-                Vector2I size = (Vector2I)MyRenderProxy.GetTextureSize(mat.Texture);
-                if(size == new Vector2I(8192, 8192))
-                    return true;
-            }
+            if(string.IsNullOrWhiteSpace(mat.Texture))
+                return false;
 
-            return false;
+            // this already checks the proper paths and such
+            Vector2I size = (Vector2I)MyRenderProxy.GetTextureSize(mat.Texture);
+            return (size == new Vector2I(8192, 8192));
         }
 
         public const string AnimatedProp1DHelp = "Animated properties (1D) are over the effect's total elapsed time." +
