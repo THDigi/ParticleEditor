@@ -6,12 +6,9 @@ A plugin for Space Engineers game to allow modders to develop particles much eas
 
 
 ## Install:
-1. Get the .dll from the [Releases](https://github.com/THDigi/ParticleEditor/releases) link on the right side.
-2. Have it be anywhere but you need to copy the path to it.
-3. Open its properties and unblock it.
-4. In SpaceEngineer's launch parameters, add `-plugin "path/to/the/dll"`
+As of SE v202 the `-plugin` launch arg no longer exists ([official statement](https://www.spaceengineersgame.com/plugins/))
 
-Alternatively, it is in the plugins list of [Plugin Loader](https://github.com/sepluginloader/PluginLoader) too.
+You have to install [Plugin Loader](https://github.com/sepluginloader/PluginLoader) and after that the Particle Editor will be in its plugins list.
 
 
 ## Usage: 
