@@ -304,17 +304,23 @@ namespace Digi.ParticleEditor
                 if(dict == null || dataField == null)
                     return;
 
-                // FIXME: dictionary can change while this iterates it, any way to threadsafe it?
-
                 object theEffectInstance = null;
-                foreach(object effectInstance in dict.Values)
+                try
                 {
-                    object data = dataField.GetValue(effectInstance);
-                    if(object.ReferenceEquals(data, SelectedParticle.Data))
+                    // FIXME: dictionary can change while this iterates it, any way to threadsafe it?
+                    foreach(object effectInstance in dict.Values)
                     {
-                        theEffectInstance = effectInstance;
-                        break;
+                        object data = dataField.GetValue(effectInstance);
+                        if(object.ReferenceEquals(data, SelectedParticle.Data))
+                        {
+                            theEffectInstance = effectInstance;
+                            break;
+                        }
                     }
+                }
+                catch(InvalidOperationException e)
+                {
+                    // HACK: ignore collection modified here :(
                 }
 
                 if(theEffectInstance == null)
@@ -372,10 +378,5 @@ namespace Digi.ParticleEditor
 
             return null; // do not override
         }
-
-
-
-
-
     }
 }
