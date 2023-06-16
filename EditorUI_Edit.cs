@@ -152,6 +152,13 @@ namespace Digi.ParticleEditor
 
                 try
                 {
+                    string fileName = SelectedParticle.Name;
+
+                    foreach(char c in Path.GetInvalidFileNameChars())
+                    {
+                        fileName = fileName.Replace(c, '_');
+                    }
+
                     FileDialog<SaveFileDialog>("Save a particle effect", null, FileDialogFilterSBC, (filePath) =>
                     {
                         try
@@ -169,7 +176,7 @@ namespace Digi.ParticleEditor
                         {
                             Log.Error(e);
                         }
-                    });
+                    }, preFilledFileName: fileName);
                 }
                 catch(Exception e)
                 {

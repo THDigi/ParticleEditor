@@ -180,7 +180,7 @@ namespace Digi.ParticleEditor
                 return new Form { TopMost = true };
         }
 
-        public static void FileDialog<TDialog>(string title, string directory, string filter, Action<string> callback) where TDialog : FileDialog, new()
+        public static void FileDialog<TDialog>(string title, string directory, string filter, Action<string> callback, string preFilledFileName = null) where TDialog : FileDialog, new()
         {
             Thread thread = new Thread(new ThreadStart(() =>
             {
@@ -199,6 +199,9 @@ namespace Digi.ParticleEditor
 
                         foreach(string folder in FileDialogPlaces())
                             dialog.CustomPlaces.Add(folder);
+
+                        if(!string.IsNullOrEmpty(preFilledFileName))
+                            dialog.FileName = preFilledFileName;
 
                         if(dialog.ShowDialog(GetMainForm()) == DialogResult.OK)
                         {
