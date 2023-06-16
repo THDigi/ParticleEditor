@@ -56,18 +56,18 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.ArraySize)] = new PropertyData() // Vector3
             {
-                NameOverride = $"Divide texture into cells ({EditorUI.DefaultEmitter.ArraySize.Name})",
+                NameOverride = $"Divide texture into cells [{EditorUI.DefaultEmitter.ArraySize.Name}]",
                 TooltipAddition = "This is normally a Vector3 but only X and Y are used.",
                 ValueRangeVector3 = new ValueInfo<Vector3>(new Vector3(1), new Vector3(256), round: 0),
             },
             [new PropId(MyGPUGenerationPropertiesEnum.ArrayOffset)] = new PropertyData() // int
             {
-                NameOverride = $"Start from cell ({EditorUI.DefaultEmitter.ArrayOffset.Name})",
+                NameOverride = $"Start from cell [{EditorUI.DefaultEmitter.ArrayOffset.Name}]",
                 ValueRangeNum = new ValueInfo<float>(0, 1024, round: 0),
             },
             [new PropId(MyGPUGenerationPropertiesEnum.ArrayModulo)] = new PropertyData() // int
             {
-                NameOverride = $"Amount of cells to use  ({EditorUI.DefaultEmitter.ArrayModulo.Name})",
+                NameOverride = $"Amount of cells to use  [{EditorUI.DefaultEmitter.ArrayModulo.Name}]",
                 ValueRangeNum = new ValueInfo<float>(1, 256, round: 0),
             },
 
@@ -94,7 +94,7 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.HueVar)] = new PropertyData() // float
             {
-                NameOverride = $"Color Hue variance ({EditorUI.DefaultEmitter.HueVar.Name})",
+                NameOverride = $"Color Hue variance [{EditorUI.DefaultEmitter.HueVar.Name}]",
                 TooltipOverride = "Randomly varies hue, higher = further hue from the original color (1 being the full 360deg)." +
                                   "\nCan only be between 0 and 1, game code caps it.",
                 ValueRangeNum = new ValueInfo<float>(0, 1, round: 3),
@@ -147,32 +147,40 @@ namespace Digi.ParticleEditor.GameData
             {
                 // HACK: buggy math, see \Content\Shaders\Transparent\GPUParticles\Emit.hlsl where Direction is being read
                 TooltipAddition = "It is internally normalized to a unit vector." +
-                                  "\nNOTE: It has buggy math for Z axis, if using only Z axis then it's fine, but if you have the other axis too then it will flip Z axis.",
+                                  "\nWARNING: It has buggy math for Z axis, if using only Z axis then it's fine, but if you have the other axis too then it will flip Z axis.",
                 ValueRangeVector3 = new ValueInfo<Vector3>(new Vector3(-1f), new Vector3(1f), round: 2, limitNumberBox: true, invalidValue: Vector3.Zero),
                 // TODO: any other prop easily validated with an invalid value?
             },
 
             [new PropId(MyGPUGenerationPropertiesEnum.DirectionConeVar)] = new PropertyData() // animated 1D float
             {
-                NameOverride = $"Radial Shape ({EditorUI.DefaultEmitter.DirectionConeVar.Name})",
-                TooltipOverride = "Starts from a line 0deg and works its way up to a full sphere at 360deg, affected by Direction.",
+                NameOverride = $"Radial Shape [{EditorUI.DefaultEmitter.DirectionConeVar.Name}]",
+                TooltipOverride = "A cone aimed towards Direction, in degrees. Makes a hemisphere at 180 and a full sphere at 360.\nExpected values 0 to 360.",
                 ValueRangeNum = new ValueInfo<float>(0f, 360f),
                 RequiredKeys1D = 0,
             },
             [new PropId(MyGPUGenerationPropertiesEnum.DirectionInnerCone)] = new PropertyData() // animated 1D float
             {
+                NameOverride = $"Radial Cut Ratio [{EditorUI.DefaultEmitter.DirectionInnerCone.Name}]",
+                TooltipOverride = $"Ratio of Radial Shape [{EditorUI.DefaultEmitter.DirectionConeVar.Name}] that will be cut off from the opposite direction." +
+                                  "\nExpected values between 0 and 1." +
+                                  "\nFew examples (shape is Radial Shape setting):" +
+                                  "\n- This 0.5 and shape 360 results in a hemisphere in the opposite direction than this 0 and shape 180." +
+                                  "\n- This 0.8 and shape 200 results in a sphere cut on both sides by 2 spheres, or a cylinder that goes into a point in the middle." +
+                                  "\n- This 1 and shape 180 results in a very sharp circle.",
+                ValueRangeNum = new ValueInfo<float>(0, 1),
                 RequiredKeys1D = 0,
             },
 
             [new PropId(MyGPUGenerationPropertiesEnum.EmitterSize)] = new PropertyData() // animated 1D Vector3
             {
-                NameOverride = $"Shape Size ({EditorUI.DefaultEmitter.EmitterSize.Name})",
+                NameOverride = $"Shape Size [{EditorUI.DefaultEmitter.EmitterSize.Name}]",
                 TooltipAddition = "Relies on 'Radial Shape' to determine shape.",
                 ValueRangeVector3 = new ValueInfo<Vector3>(new Vector3(0), new Vector3(1000000)),
             },
             [new PropId(MyGPUGenerationPropertiesEnum.EmitterSizeMin)] = new PropertyData() // animated 1D float
             {
-                NameOverride = $"Inner Carve Ratio ({EditorUI.DefaultEmitter.EmitterSizeMin.Name})",
+                NameOverride = $"Inner Carve Ratio [{EditorUI.DefaultEmitter.EmitterSizeMin.Name}]",
                 //ValueRangeNum = new ValueInfo<float>(0f, 1f),
             },
 
@@ -278,7 +286,7 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.Streaks)] = new PropertyData() // bool
             {
-                NameOverride = $"Stretch with Velocity ({EditorUI.DefaultEmitter.Streaks.Name})",
+                NameOverride = $"Stretch with Velocity [{EditorUI.DefaultEmitter.Streaks.Name}]",
                 TooltipOverride = "Stretches the particle billboard by its velocity." +
                                   "\nDoes not take external motion into account." +
                                   "\nRequires 'Rotation Reference' to be Camera.",
@@ -317,7 +325,7 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.UseAlphaAnisotropy)] = new PropertyData() // bool
             {
-                NameOverride = "Transparent from the sides (Alpha Anisotropy)",
+                NameOverride = $"Transparent from the sides [{EditorUI.DefaultEmitter.UseAlphaAnisotropy.Name}]",
                 TooltipOverride = "Makes particles transparent when you see sprite/billboard from the sides" +
                                   "\nOnly seems to work if 'Rotation reference' is set to Local.",
             },
@@ -371,7 +379,7 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.RotationEnabled)] = new PropertyData() // bool
             {
-                NameOverride = $"Spawn with random roll ({EditorUI.DefaultEmitter.RotationEnabled.Name})",
+                NameOverride = $"Spawn with random roll [{EditorUI.DefaultEmitter.RotationEnabled.Name}]",
                 TooltipOverride = "Makes particles spawn with a random roll angle." +
                                   "\nCould also have other unknown effets.",
             },
