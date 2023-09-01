@@ -14,6 +14,7 @@ using Sandbox.Graphics.GUI;
 using VRage.FileSystem;
 using VRage.Game;
 using VRage.ObjectBuilders;
+using VRage.ObjectBuilders.Private;
 using VRage.Render.Particles;
 using VRage.Utils;
 using VRageMath;
@@ -81,7 +82,7 @@ namespace Digi.ParticleEditor
                 //xml = xml.Replace(" encoding=\"utf-16\"", "");
                 //File.WriteAllText(filePath, xml);
 
-                return MyObjectBuilderSerializer.SerializeXML(filePath, false, ob);
+                return MyObjectBuilderSerializerKeen.SerializeXML(filePath, false, ob);
             }
             catch(Exception e)
             {

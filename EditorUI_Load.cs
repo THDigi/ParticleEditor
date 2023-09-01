@@ -11,6 +11,7 @@ using Sandbox.Graphics.GUI;
 using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.ObjectBuilders;
+using VRage.ObjectBuilders.Private;
 using VRage.Render.Particles;
 using VRageMath;
 using VRageRender.Animations;
@@ -388,7 +389,7 @@ Tag: {data.Tag}";
                         if(text.Contains("<ParticleEffects>"))
                         {
                             MyObjectBuilder_Definitions definitionsOB;
-                            if(!MyObjectBuilderSerializer.DeserializeXML<MyObjectBuilder_Definitions>(filePath, out definitionsOB) || definitionsOB == null)
+                            if(!MyObjectBuilderSerializerKeen.DeserializeXML<MyObjectBuilder_Definitions>(filePath, out definitionsOB) || definitionsOB == null)
                             {
                                 Log.Error($"'{fileName}': Couldn't deserialize, see SE log maybe there's something.");
                                 continue;
