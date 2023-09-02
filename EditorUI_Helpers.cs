@@ -10,6 +10,7 @@ using Digi.ParticleEditor.GameData;
 using Digi.ParticleEditor.UIControls;
 using Sandbox;
 using Sandbox.Game.Gui;
+using Sandbox.Graphics;
 using Sandbox.Graphics.GUI;
 using VRage.FileSystem;
 using VRage.Game;
@@ -91,7 +92,7 @@ namespace Digi.ParticleEditor
             }
         }
 
-        public static bool CanReadInputs(bool ignoreAllowHotkeyScreens = false)
+        public static bool CanReadInputs()
         {
             MyGuiScreenBase focusScreen = MyScreenManager.GetScreenWithFocus();
             if(focusScreen == null)
@@ -100,7 +101,7 @@ namespace Digi.ParticleEditor
             if(focusScreen is MyGuiScreenGamePlay)
                 return true;
 
-            if(!ignoreAllowHotkeyScreens && focusScreen is IScreenAllowHotkeys)
+            if(focusScreen is IScreenAllowHotkeys allowHotkeys && allowHotkeys.IsAllowed(MyGuiManager.MouseCursorPosition))
                 return true;
 
             return false;

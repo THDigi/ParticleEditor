@@ -1238,6 +1238,15 @@ namespace Digi.ParticleEditor.UIControls
             return null;
         }
 
+        bool IScreenAllowHotkeys.IsAllowed(Vector2 mousePosition)
+        {
+            // mouse over GUI, ignore hotkeys
+            if(Host.Panel.Rectangle.Contains(mousePosition))
+                return false;
+
+            return true;
+        }
+
         public override void HandleInput(bool receivedFocusInThisUpdate)
         {
             // allow game control by holding RMB

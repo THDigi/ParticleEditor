@@ -1,4 +1,9 @@
-﻿namespace Digi.ParticleEditor.UIControls
+﻿using VRageMath;
+
+namespace Digi.ParticleEditor.UIControls
 {
-    public interface IScreenAllowHotkeys { }
+    public interface IScreenAllowHotkeys
+    {
+        bool IsAllowed(Vector2 mousePosition);
+    }
 }

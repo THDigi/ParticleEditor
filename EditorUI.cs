@@ -246,6 +246,15 @@ namespace Digi.ParticleEditor
         //    return ret;
         //}
 
+        bool IScreenAllowHotkeys.IsAllowed(Vector2 mousePosition)
+        {
+            // mouse over right side GUI, ignore hotkeys
+            if(Host.Panel.Rectangle.Contains(mousePosition))
+                return false;
+
+            return true;
+        }
+
         public override bool Update(bool hasFocus)
         {
             StatusUI?.Update();
