@@ -7,6 +7,7 @@ using Sandbox.Game.Gui;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
 using VRage.Game;
+using VRage.Game.ModAPI.Interfaces;
 using VRage.Input;
 using VRage.Render.Particles;
 using VRage.Utils;
@@ -17,6 +18,8 @@ namespace Digi.ParticleEditor
 {
     public class StatusUI
     {
+        const float MaxSpeedOverride = 5000;
+
         readonly EditorUI EditorUI;
 
         public VerticalControlsHost Host;
@@ -26,6 +29,7 @@ namespace Digi.ParticleEditor
         bool DrawLights = false;
 
         float? GravityOverride = null;
+        float? VelocityOverride = null;
 
         bool ShowHUD = false;
 
@@ -71,6 +75,23 @@ namespace Digi.ParticleEditor
                 valueWriter: (value) =>
                 {
                     return (value < -0.5f ? "OFF" : Math.Max(0, value).ToString());
+                });
+
+            Host.InsertSlider("Force character velocity",
+                "Overrides character velocity to move at this speed towards left relative to character." +
+                "\nYou can rightclick to turn it off and you will maintain that speed in space." +
+                "\nManually moving or turning on dampeners will remove this speed boost.",
+                -1f, MaxSpeedOverride, (VelocityOverride.HasValue ? VelocityOverride.Value : -1), -1f, 0,
+                (value) =>
+                {
+                    if(value <= 0)
+                        VelocityOverride = null;
+                    else
+                        VelocityOverride = Math.Max(0, value);
+                },
+                valueWriter: (value) =>
+                {
+                    return (value <= 0 ? "OFF" : Math.Max(0, value).ToString());
                 });
 
             (MyGuiControlParent cbShowHud, _, _) = Host.InsertCheckbox("Show HUD",
@@ -150,6 +171,18 @@ namespace Digi.ParticleEditor
 
         public void Update()
         {
+            if(VelocityOverride.HasValue)
+            {
+                MyCharacter character = MySession.Static.LocalCharacter;
+                if(character?.Physics != null)
+                {
+                    if(character.DampenersEnabled)
+                        ((IMyControllableEntity)character).SwitchDamping();
+
+                    character.Physics.SetSpeeds(character.WorldMatrix.Left * VelocityOverride.Value, Vector3.Zero);
+                }
+            }
+
             if(SelectedParticle.SpawnedEffect != null)
             {
                 if(EditorUI.CanReadInputs() && MyInput.Static.IsNewKeyPressed(MyKeys.F))
