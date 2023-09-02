@@ -91,13 +91,16 @@ namespace Digi.ParticleEditor
             }
         }
 
-        public static bool CanReadInputs()
+        public static bool CanReadInputs(bool ignoreAllowHotkeyScreens = false)
         {
             MyGuiScreenBase focusScreen = MyScreenManager.GetScreenWithFocus();
             if(focusScreen == null)
                 return false;
 
-            if(focusScreen is IScreenAllowHotkeys || focusScreen is MyGuiScreenGamePlay)
+            if(focusScreen is MyGuiScreenGamePlay)
+                return true;
+
+            if(!ignoreAllowHotkeyScreens && focusScreen is IScreenAllowHotkeys)
                 return true;
 
             return false;

@@ -152,14 +152,12 @@ namespace Digi.ParticleEditor
         {
             if(SelectedParticle.SpawnedEffect != null)
             {
-                bool canReadInputs = EditorUI.CanReadInputs();
-
-                if(canReadInputs && MyInput.Static.IsNewKeyPressed(MyKeys.F))
+                if(EditorUI.CanReadInputs() && MyInput.Static.IsNewKeyPressed(MyKeys.F))
                 {
                     SelectedParticle.Refresh(false);
                 }
 
-                if(canReadInputs && MyInput.Static.IsNewKeyPressed(MyKeys.R))
+                if(EditorUI.CanReadInputs(ignoreAllowHotkeyScreens: true) && MyInput.Static.IsNewKeyPressed(MyKeys.R))
                 {
                     SelectedParticle.UseParent = !SelectedParticle.UseParent;
 
