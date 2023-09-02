@@ -22,7 +22,7 @@ namespace Digi.ParticleEditor
 
     // TODO: keep a log of all actions done per particle and write them as XML comments in the backup
 
-    public partial class EditorUI : MyGuiScreenDebugBase, IScreenAllowHotkeys
+    public partial class EditorUI : UIGamePassthroughScreenBase, IScreenAllowHotkeys
     {
         public static EditorUI Instance;
 
@@ -220,15 +220,8 @@ namespace Digi.ParticleEditor
             OnClose();
         }
 
-        Vector2 RememberMouse = Vector2.Zero;
-        bool HandlingOtherInputs = false;
-        MyMouseButtonsEnum ControlGameInput = MyMouseButtonsEnum.Right;
-
         public override void HandleInput(bool receivedFocusInThisUpdate)
         {
-            if(HandlingOtherInputs)
-                return; // a quick and dirty way to prevent infinite accidental recursion
-
             if(MyInput.Static.IsNewKeyPressed(MyKeys.Escape))
             {
                 Close();
@@ -237,51 +230,9 @@ namespace Digi.ParticleEditor
 
             SelectedParticle.Update();
 
-            if(!DrawMouseCursor)
-            {
-                if(!MyInput.Static.IsMousePressed(ControlGameInput))
-                {
-                    DrawMouseCursor = true;
-
-                    // TODO: toggleable mouse pos saving?
-                    MyInput.Static.SetMousePosition((int)RememberMouse.X, (int)RememberMouse.Y);
-                }
-            }
-
-            if(DrawMouseCursor)
-            {
-                Vector2 mousePos = MyInput.Static.GetMousePosition(); // in screen pixels
-
-                if(MyInput.Static.IsNewMousePressed(ControlGameInput))
-                {
-                    Vector2 mousePosGUI = MyGuiManager.MouseCursorPosition;
-                    if(!Host.Panel.Rectangle.Contains(mousePosGUI) && !StatusUI.Host.Panel.Rectangle.Contains(mousePosGUI))
-                    {
-                        RememberMouse = mousePos;
-                        DrawMouseCursor = false;
-                    }
-                }
-            }
-
-            if(!DrawMouseCursor)
-            {
-                HandlingOtherInputs = true;
-
-                // allow game control
-                foreach(MyGuiScreenBase screen in MyScreenManager.Screens)
-                {
-                    if(screen == this)
-                        continue;
-
-                    //if(screen is EditorUI || screen is MyGuiScreenScriptingTools || screen is MyGuiScreenCutscenes)
-                    //    continue;
-
-                    screen.HandleInput(receivedFocusInThisUpdate);
-                }
-
-                HandlingOtherInputs = false;
+            // allow game control by holding RMB
+            if(ComputeGameControlPassThrough(receivedFocusInThisUpdate, Host.Panel.Rectangle, StatusUI.Host.Panel.Rectangle))
                 return;
-            }
 
             base.HandleInput(receivedFocusInThisUpdate);
         }

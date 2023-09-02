@@ -11,7 +11,7 @@ using VRageRender.Animations;
 
 namespace Digi.ParticleEditor.UIControls
 {
-    public class UIAnimatedValueEditor : MyGuiScreenBase, IScreenAllowHotkeys
+    public class UIAnimatedValueEditor : UIGamePassthroughScreenBase, IScreenAllowHotkeys
     {
         PropId PropId;
         object PropHost;
@@ -59,7 +59,7 @@ namespace Digi.ParticleEditor.UIControls
         public override string GetFriendlyName() => nameof(UIAnimatedValueEditor);
 
         public UIAnimatedValueEditor(object propHost, string propInternalName, string propFriendlyName, string tooltip, bool is2D)
-            : base(WindowPosition, isTopMostScreen: false)
+            : base(WindowPosition, null, null, isTopMostScreen: false)
         {
             // TODO convert to a sub-UI of editorUI so that I can show status UI top-left... and also potentially leave right side shown? /shrug
 
@@ -1240,7 +1240,9 @@ namespace Digi.ParticleEditor.UIControls
 
         public override void HandleInput(bool receivedFocusInThisUpdate)
         {
-            // TODO: allow RMB to free move and all that stuff
+            // allow game control by holding RMB
+            if(ComputeGameControlPassThrough(receivedFocusInThisUpdate, Host.Panel.Rectangle))
+                return;
 
             base.HandleInput(receivedFocusInThisUpdate);
 

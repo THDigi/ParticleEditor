@@ -7,10 +7,11 @@
     <ProjectGuid>{69591029-510B-408E-8FD0-BEFDC46E45C8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ParticleEditor</RootNamespace>
+    <RootNamespace>Digi.ParticleEditor</RootNamespace>
     <AssemblyName>ParticleEditor</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -121,6 +122,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="UIControls\UIAnimatedValueEditor.cs" />
     <Compile Include="UIControls\IScreenAllowHotkeys.cs" />
+    <Compile Include="UIControls\UIGamePassthroughScreenBase.cs" />
     <Compile Include="UIControls\UITextureAligner.cs" />
     <Compile Include="UIControls\UIClickableLabel.cs" />
     <Compile Include="UIControls\UINumberBox.cs" />
