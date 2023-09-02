@@ -29,15 +29,15 @@ namespace Digi.ParticleEditor
 
         MyGuiControlButton.StyleDefinition ButtonStyle_TabSelected = new MyGuiControlButton.StyleDefinition
         {
-            NormalTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_BORDER,
-            HighlightTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_HIGHLIGHTED_BORDER,
-            FocusTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_FOCUS_BORDER,
+            NormalTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_ACTIVE_BORDER,
+            HighlightTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_FOCUS_BORDER,
+            FocusTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_ACTIVE_BORDER,
             ActiveTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_ACTIVE_BORDER,
             NormalFont = "White",
             HighlightFont = "White",
             Padding = new MyGuiBorderThickness(5f / MyGuiConstants.GUI_OPTIMAL_SIZE.X, 5f / MyGuiConstants.GUI_OPTIMAL_SIZE.Y),
-            TextColorFocus = MyGuiConstants.HIGHLIGHT_TEXT_COLOR,
-            BackgroundColor = new Color(142, 188, 206),
+            TextColorFocus = Color.White,
+            BackgroundColor = Color.White,
         };
 
         void Controls_EditParticle()
