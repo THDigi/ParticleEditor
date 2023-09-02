@@ -55,11 +55,13 @@ namespace Digi.ParticleEditor.UIControls
                 }
             }
 
+            bool newPressed = MyInput.Static.IsNewMousePressed(ControlGameInput);
+
             if(DrawMouseCursor)
             {
                 Vector2 mousePos = MyInput.Static.GetMousePosition(); // in screen pixels
 
-                if(MyInput.Static.IsNewMousePressed(ControlGameInput))
+                if(newPressed)
                 {
                     Vector2 mousePosGUI = MyGuiManager.MouseCursorPosition;
 
@@ -81,6 +83,9 @@ namespace Digi.ParticleEditor.UIControls
 
             if(!DrawMouseCursor)
             {
+                if(newPressed) // ignore first frame of press to avoid triggering stuff in world like when aiming at conveyor ports.
+                    return true;
+
                 try
                 {
                     HandlingOtherInputs = true;
