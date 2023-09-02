@@ -55,7 +55,7 @@ namespace Digi.ParticleEditor
         {
             Host = host;
 
-            MyGuiControlButton buttonAdd = Host.CreateButton("Add", "Immediately adds an emitter with default values", clicked: (b) =>
+            MyGuiControlButton buttonAdd = Host.CreateButton("Add", "Immediately adds an emitter with default values.\nDoes not use selection.", clicked: (b) =>
             {
                 if(SelectedParticle.SpawnedEffect == null)
                     return;
@@ -80,77 +80,137 @@ namespace Digi.ParticleEditor
                 SelectedParticle.Refresh();
             });
 
-            MyGuiControlButton buttonClone = Host.CreateButton("Clone", "Adds an emitter with the settings of the selected emitter.", clicked: (b) =>
+            MyGuiControlButton buttonClone = Host.CreateButton("Clone", "Immediately copies the selected emitter.\nRequires a single selection.", clicked: (b) =>
             {
-                if(SelectedParticle.SpawnedEffect == null || SelectedEmitter == null)
+                if(SelectedParticle.SpawnedEffect == null)
                     return;
 
-                MyParticleGPUGenerationData emitter = new MyParticleGPUGenerationData();
-                emitter.Start(SelectedParticle.Data); // adds properties and default values
-
-                ParticleGeneration ob = SelectedEmitter.SerializeToObjectBuilder();
-                emitter.DeserializeFromObjectBuilder(ob);
-
-                emitter.Name = $"Clone of {SelectedEmitter.Name}";
-
-                const bool recreateParticle = false;
-                SelectedParticle.Data.AddGeneration(emitter, recreateParticle);
-
-                SelectedEmitter = emitter;
-
-                if(Editor.DrawOnlySelected)
+                if(SelectedEmitter != null)
                 {
-                    Editor.RestoreEnabled();
-                    Editor.RefreshShowOnlySelected();
-                }
+                    MyParticleGPUGenerationData emitter = new MyParticleGPUGenerationData();
+                    emitter.Start(SelectedParticle.Data); // adds properties and default values
 
-                RefreshEmitterList();
-                EmitterListBox.ScrollToFirstSelection();
-                SelectedParticle.Refresh();
-            });
+                    ParticleGeneration ob = SelectedEmitter.SerializeToObjectBuilder();
+                    emitter.DeserializeFromObjectBuilder(ob);
 
-            MyGuiControlButton buttonRename = Host.CreateButton("Rename", "Shows a popup to rename the selected emitter", clicked: (b) =>
-            {
-                if(SelectedParticle.SpawnedEffect == null || SelectedEmitter == null)
-                    return;
+                    emitter.Name = $"Clone of {SelectedEmitter.Name}";
 
-                ValueGetScreenWithCaption textPopup = new ValueGetScreenWithCaption($"Rename emitter {SelectedEmitter.Name}", SelectedEmitter.Name, (text) =>
-                {
-                    if(SelectedEmitter != null)
+                    const bool recreateParticle = false;
+                    SelectedParticle.Data.AddGeneration(emitter, recreateParticle);
+
+                    SelectedEmitter = emitter;
+
+                    if(Editor.DrawOnlySelected)
                     {
-                        SelectedEmitter.Name = text;
-                        RefreshEmitterList();
-                    }
-                    return true;
-                });
-                MyGuiSandbox.AddScreen(textPopup);
-            });
-
-            MyGuiControlButton buttonDelete = Host.CreateButton("Delete", "Deletes the selected emitter", clicked: (b) =>
-            {
-                if(SelectedParticle.SpawnedEffect == null || SelectedEmitter == null)
-                    return;
-
-                MyGuiScreenMessageBox msgBox = MyGuiSandbox.CreateMessageBox(MyMessageBoxStyleEnum.Info, MyMessageBoxButtonsType.YES_NO, new StringBuilder($"Delete '{SelectedEmitter.Name}' emitter?"), new StringBuilder("Delete confirmation"));
-                msgBox.ResultCallback = (result) =>
-                {
-                    if(SelectedEmitter != null && result == MyGuiScreenMessageBox.ResultEnum.YES)
-                    {
-                        SelectedParticle.Data.RemoveGeneration(SelectedEmitter);
-
-                        Editor.StoredEnabled.Remove(SelectedEmitter);
-
-                        SelectedEmitter = null;
-
-                        RefreshEmitterList();
-                        SelectedParticle.Refresh();
+                        Editor.RestoreEnabled();
                         Editor.RefreshShowOnlySelected();
                     }
-                };
-                MyScreenManager.AddScreen(msgBox);
+
+                    RefreshEmitterList();
+                    EmitterListBox.ScrollToFirstSelection();
+                    SelectedParticle.Refresh();
+                }
+                else if(EmitterListBox?.SelectedItems != null && EmitterListBox.SelectedItems.Count > 1)
+                {
+                    EditorUI.PopupInfo("Too many selections", "Select a single emitter to clone.", MyMessageBoxStyleEnum.Error);
+                }
             });
 
-            Editor.ButtonResetVis = Host.CreateButton("ResetVis", "If this is a loaded particle, this resets visibility of emitters back to their original state (Enabled state).", clicked: (b) =>
+            MyGuiControlButton buttonRename = Host.CreateButton("Rename", "Prompts to rename the selected emitter(s).", clicked: (b) =>
+            {
+                if(SelectedParticle.SpawnedEffect == null)
+                    return;
+
+                if(SelectedEmitter != null)
+                {
+                    ValueGetScreenWithCaption textPopup = new ValueGetScreenWithCaption($"Rename emitter {SelectedEmitter.Name}", SelectedEmitter.Name, (newName) =>
+                    {
+                        if(SelectedEmitter != null)
+                        {
+                            SelectedEmitter.Name = newName;
+                            RefreshEmitterList();
+                        }
+                        return true;
+                    });
+                    MyGuiSandbox.AddScreen(textPopup);
+                }
+                else if(EmitterListBox?.SelectedItems != null && EmitterListBox.SelectedItems.Count > 1)
+                {
+                    ValueGetScreenWithCaption textPopup = new ValueGetScreenWithCaption($"Rename {EmitterListBox.SelectedItems.Count} emitters, numbers will be suffixed.", "Emitter", (newName) =>
+                    {
+                        if(EmitterListBox?.SelectedItems != null && EmitterListBox.SelectedItems.Count > 1)
+                        {
+                            int num = 1;
+
+                            foreach(MyGuiControlListbox.Item item in EmitterListBox.SelectedItems)
+                            {
+                                var emitter = item.UserData as MyParticleGPUGenerationData;
+                                if(emitter != null)
+                                {
+                                    emitter.Name = $"{newName} #{num}";
+                                    num++;
+                                }
+                            }
+
+                            RefreshEmitterList();
+                        }
+                        return true;
+                    });
+                    MyGuiSandbox.AddScreen(textPopup);
+                }
+            });
+
+            MyGuiControlButton buttonDelete = Host.CreateButton("Delete", "Prompts to delete the selected emitter(s).", clicked: (b) =>
+            {
+                if(SelectedParticle.SpawnedEffect == null)
+                    return;
+
+                if(SelectedEmitter != null)
+                {
+                    EditorUI.PopupConfirmation($"Delete '{SelectedEmitter.Name}' emitter?", () =>
+                    {
+                        if(SelectedEmitter != null)
+                        {
+                            SelectedParticle.Data.RemoveGeneration(SelectedEmitter);
+                            Editor.StoredEnabled.Remove(SelectedEmitter);
+
+                            CallAfterRemove();
+                        }
+                    });
+                }
+                else if(EmitterListBox?.SelectedItems != null && EmitterListBox.SelectedItems.Count > 1)
+                {
+                    EditorUI.PopupConfirmation($"Delete the {EmitterListBox.SelectedItems.Count} selected emitters?", () =>
+                    {
+                        if(EmitterListBox?.SelectedItems != null)
+                        {
+                            foreach(MyGuiControlListbox.Item item in EmitterListBox.SelectedItems)
+                            {
+                                var emitter = item.UserData as MyParticleGPUGenerationData;
+                                if(emitter != null)
+                                {
+                                    SelectedParticle.Data.RemoveGeneration(emitter);
+                                    Editor.StoredEnabled.Remove(emitter);
+                                }
+                            }
+
+                            CallAfterRemove();
+                        }
+                    });
+                }
+
+                void CallAfterRemove()
+                {
+                    SelectedEmitter = null;
+
+                    RefreshEmitterList();
+                    SelectedParticle.Refresh();
+                    Editor.RefreshShowOnlySelected();
+                }
+            });
+
+            Editor.ButtonResetVis = Host.CreateButton("ResetVis", "If this is a loaded particle, this resets visibility of emitters back to their original state (Enabled state)." +
+                "\nDoes not use selection.", clicked: (b) =>
             {
                 if(SelectedParticle.SpawnedEffect == null)
                     return;
@@ -201,7 +261,7 @@ namespace Digi.ParticleEditor
 
             Host.PositionControlsNoSize(buttonAdd, buttonClone, buttonRename, buttonDelete, Editor.ButtonResetVis, cbDrawSelected);
 
-            EmitterListBox = Host.CreateListBox(6, Host.PanelSize.X * 0.95f);
+            EmitterListBox = Host.CreateListBox(6, Host.PanelSize.X * 0.95f, multiSelect: true);
             Host.PositionAndFillWidth(EmitterListBox, EmitterListBox.TextScale);
 
             EmitterListBox.ItemsSelected += (control) =>
@@ -209,13 +269,15 @@ namespace Digi.ParticleEditor
                 if(control.SelectedItems.Count == 0)
                     return;
 
-                SelectedEmitter = control.SelectedItems[0]?.UserData as MyParticleGPUGenerationData;
-                Editor.RefreshShowOnlySelected();
+                if(control.SelectedItems.Count > 1)
+                    SelectedEmitter = null;
+                else
+                    SelectedEmitter = control.SelectedItems[0]?.UserData as MyParticleGPUGenerationData;
 
                 if(SelectedEmitter != null)
-                {
-                    RefreshEmitterProperties(SelectedEmitter);
-                }
+                    Editor.RefreshShowOnlySelected();
+
+                RefreshEmitterProperties(SelectedEmitter);
             };
 
             EmitterListBox.ItemDoubleClicked += (control) =>
@@ -363,6 +425,17 @@ namespace Digi.ParticleEditor
                 ScrollHost.SkipProperties = SkipProperties;
                 SkipProperties.Clear();
 
+                if(EmitterListBox?.SelectedItems != null && EmitterListBox.SelectedItems.Count > 1)
+                {
+                    // to support editing props of multiple emitters it would need a few things:
+                    // - some nice way of showing all values or some way to show that value is different for other selections
+                    // - have to fix GUI refresh on expand/contract sections to maintain multi-select
+
+                    ScrollHost.PositionAndFillWidth(ScrollHost.CreateLabel("Multiple emitters selected."));
+                    EditorUI.FinalizeScrollable(ScrollablePanel, ScrollHost.Panel, ScrollHost);
+                    return;
+                }
+
                 if(emitter == null)
                     return;
 
@@ -437,7 +510,7 @@ namespace Digi.ParticleEditor
 
                     ScrollHost.PropAnimated(emitter, emitter.DirectionConeVar);
 
-                    ScrollHost.PropAnimated(emitter, emitter.DirectionInnerCone);
+                    ScrollHost.PropAnimated(emitter, emitter.DirectionInnerCone); // TODO: a way to show a calculated value? like in this case show DirectionInnerCone*DirectionConeVar as degrees.
 
                     ScrollHost.PropAnimated(emitter, emitter.EmitterSize);
 

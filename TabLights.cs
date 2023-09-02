@@ -40,7 +40,7 @@ namespace Digi.ParticleEditor
         {
             Host = host;
 
-            MyGuiControlButton buttonAdd = Host.CreateButton("Add", "Immediately adds a light with default values", clicked: (b) =>
+            MyGuiControlButton buttonAdd = Host.CreateButton("Add", "Immediately adds a light with default values.\nDoes not use selection.", clicked: (b) =>
             {
                 if(SelectedParticle.SpawnedEffect == null)
                     return;
@@ -65,74 +65,138 @@ namespace Digi.ParticleEditor
                 SelectedParticle.Refresh();
             });
 
-            MyGuiControlButton buttonClone = Host.CreateButton("Clone", "Creates a new light with the same settings as the selected light", clicked: (b) =>
+            MyGuiControlButton buttonClone = Host.CreateButton("Clone", "Immediately copies the selected light.\nRequires a single selection.", clicked: (b) =>
             {
-                if(SelectedParticle.SpawnedEffect == null || SelectedLight == null)
+                if(SelectedParticle.SpawnedEffect == null)
                     return;
 
-                MyParticleLightData light = new MyParticleLightData();
-                light.Start(SelectedParticle.Data); // adds properties and default values
-
-                ParticleLight ob = SelectedLight.SerializeToObjectBuilder();
-                light.DeserializeFromObjectBuilder(ob);
-
-                light.Name = $"Clone of {SelectedLight.Name}";
-
-                const bool recreateParticle = false;
-                SelectedParticle.Data.AddParticleLight(light, recreateParticle);
-
-                SelectedLight = light;
-
-                if(Editor.DrawOnlySelected)
+                if(SelectedLight != null)
                 {
-                    Editor.RestoreEnabled();
-                    Editor.RefreshShowOnlySelected();
+                    MyParticleLightData light = new MyParticleLightData();
+                    light.Start(SelectedParticle.Data); // adds properties and default values
+
+                    ParticleLight ob = SelectedLight.SerializeToObjectBuilder();
+                    light.DeserializeFromObjectBuilder(ob);
+
+                    light.Name = $"Clone of {SelectedLight.Name}";
+
+                    const bool recreateParticle = false;
+                    SelectedParticle.Data.AddParticleLight(light, recreateParticle);
+
+                    SelectedLight = light;
+
+                    if(Editor.DrawOnlySelected)
+                    {
+                        Editor.RestoreEnabled();
+                        Editor.RefreshShowOnlySelected();
+                    }
+
+                    RefreshLightsList();
+                    LightListBox.ScrollToFirstSelection();
+                    SelectedParticle.Refresh();
+                }
+                else if(LightListBox?.SelectedItems != null && LightListBox.SelectedItems.Count > 1)
+                {
+                    EditorUI.PopupInfo("Too many selections", "Select a single light to clone.", MyMessageBoxStyleEnum.Error);
+                }
+            });
+
+            MyGuiControlButton buttonRename = Host.CreateButton("Rename", "Prompts to rename the selected light(s).", clicked: (b) =>
+            {
+                if(SelectedParticle.SpawnedEffect == null)
+                    return;
+
+                if(SelectedLight != null)
+                {
+                    ValueGetScreenWithCaption textPopup = new ValueGetScreenWithCaption($"Rename light {SelectedLight.Name}", SelectedLight.Name, (text) =>
+                    {
+                        if(SelectedLight != null)
+                        {
+                            SelectedLight.Name = text;
+                            RefreshLightsList();
+                        }
+                        return true;
+                    });
+                    MyGuiSandbox.AddScreen(textPopup);
+                }
+                else if(LightListBox?.SelectedItems != null && LightListBox.SelectedItems.Count > 1)
+                {
+                    ValueGetScreenWithCaption textPopup = new ValueGetScreenWithCaption($"Rename {LightListBox.SelectedItems.Count} lights, numbers will be suffixed.", "Light", (newName) =>
+                    {
+                        if(LightListBox?.SelectedItems != null && LightListBox.SelectedItems.Count > 1)
+                        {
+                            int num = 1;
+
+                            foreach(MyGuiControlListbox.Item item in LightListBox.SelectedItems)
+                            {
+                                var emitter = item.UserData as MyParticleLightData;
+                                if(emitter != null)
+                                {
+                                    emitter.Name = $"{newName} #{num}";
+                                    num++;
+                                }
+                            }
+
+                            RefreshLightsList();
+                        }
+                        return true;
+                    });
+                    MyGuiSandbox.AddScreen(textPopup);
+                }
+            });
+
+            MyGuiControlButton buttonDelete = Host.CreateButton("Delete", "Prompts to delete the selected light(s).", clicked: (b) =>
+            {
+                if(SelectedParticle.SpawnedEffect == null)
+                    return;
+
+                if(SelectedLight != null)
+                {
+                    EditorUI.PopupConfirmation($"Delete '{SelectedLight.Name}' light?", () =>
+                    {
+                        if(SelectedLight != null)
+                        {
+                            SelectedParticle.Data.RemoveParticleLight(SelectedLight);
+                            Editor.StoredEnabled.Remove(SelectedLight);
+
+                            CallAfterRemove();
+                        }
+                    });
+                }
+                else if(LightListBox?.SelectedItems != null && LightListBox.SelectedItems.Count > 1)
+                {
+                    EditorUI.PopupConfirmation($"Delete the {LightListBox.SelectedItems.Count} selected lights?", () =>
+                    {
+                        if(LightListBox?.SelectedItems != null)
+                        {
+                            foreach(MyGuiControlListbox.Item item in LightListBox.SelectedItems)
+                            {
+                                var light = item.UserData as MyParticleLightData;
+                                if(light != null)
+                                {
+                                    SelectedParticle.Data.RemoveParticleLight(light);
+                                    Editor.StoredEnabled.Remove(light);
+                                }
+                            }
+
+                            CallAfterRemove();
+                        }
+                    });
                 }
 
-                RefreshLightsList();
-                LightListBox.ScrollToFirstSelection();
-                SelectedParticle.Refresh();
-            });
-
-            MyGuiControlButton buttonRename = Host.CreateButton("Rename", "Shows a popup to rename the selected light", clicked: (b) =>
-            {
-                if(SelectedParticle.SpawnedEffect == null || SelectedLight == null)
-                    return;
-
-                ValueGetScreenWithCaption textPopup = new ValueGetScreenWithCaption($"Rename light {SelectedLight.Name}", SelectedLight.Name, (text) =>
+                void CallAfterRemove()
                 {
-                    if(SelectedLight != null)
-                    {
-                        SelectedLight.Name = text;
-                        RefreshLightsList();
-                    }
-                    return true;
-                });
-
-                MyGuiSandbox.AddScreen(textPopup);
-            });
-
-            MyGuiControlButton buttonDelete = Host.CreateButton("Delete", "Deletes the selected light", clicked: (b) =>
-            {
-                if(SelectedParticle.SpawnedEffect == null || SelectedLight == null)
-                    return;
-
-                EditorUI.PopupConfirmation($"Delete '{SelectedLight.Name}' light?", () =>
-                {
-                    SelectedParticle.Data.RemoveParticleLight(SelectedLight);
-
-                    Editor.StoredEnabled.Remove(SelectedLight);
-
                     SelectedLight = null;
 
                     RefreshLightsList();
                     SelectedParticle.Refresh();
 
                     Editor.RefreshShowOnlySelected();
-                });
+                }
             });
 
-            Editor.ButtonResetVis = Host.CreateButton("ResetVis", "If this is a loaded particle, this resets visibility of lights back to their original state (Enabled state).", clicked: (b) =>
+            Editor.ButtonResetVis = Host.CreateButton("ResetVis", "If this is a loaded particle, this resets visibility of all lights back to their original state (Enabled state)." +
+                "\nDoes not use selection.", clicked: (b) =>
             {
                 if(SelectedParticle.SpawnedEffect == null)
                     return;
@@ -183,21 +247,23 @@ namespace Digi.ParticleEditor
 
             Host.PositionControlsNoSize(buttonAdd, buttonClone, buttonRename, buttonDelete, Editor.ButtonResetVis, cbDrawSelected);
 
-            LightListBox = Host.CreateListBox(6, Host.PanelSize.X * 0.95f);
+            LightListBox = Host.CreateListBox(6, Host.PanelSize.X * 0.95f, multiSelect: true);
             Host.PositionAndFillWidth(LightListBox, LightListBox.TextScale);
-            
+
             LightListBox.ItemsSelected += (control) =>
             {
                 if(control.SelectedItems.Count == 0)
                     return;
 
-                SelectedLight = (MyParticleLightData)control.SelectedItems[0].UserData;
-                Editor.RefreshShowOnlySelected();
+                if(control.SelectedItems.Count > 1)
+                    SelectedLight = null;
+                else
+                    SelectedLight = control.SelectedItems[0]?.UserData as MyParticleLightData;
 
                 if(SelectedLight != null)
-                {
-                    RefreshLightProperties(SelectedLight);
-                }
+                    Editor.RefreshShowOnlySelected();
+
+                RefreshLightProperties(SelectedLight);
             };
 
             LightListBox.ItemDoubleClicked += (control) =>
@@ -331,6 +397,13 @@ namespace Digi.ParticleEditor
                 ScrollHost.Reset();
                 ScrollHost.SkipProperties = SkipProperties;
                 SkipProperties.Clear();
+
+                if(LightListBox?.SelectedItems != null && LightListBox.SelectedItems.Count > 1)
+                {
+                    ScrollHost.PositionAndFillWidth(ScrollHost.CreateLabel("Multiple lights selected."));
+                    EditorUI.FinalizeScrollable(ScrollablePanel, ScrollHost.Panel, ScrollHost);
+                    return;
+                }
 
                 if(light == null)
                     return;
