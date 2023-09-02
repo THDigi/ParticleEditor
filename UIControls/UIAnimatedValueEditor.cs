@@ -876,6 +876,8 @@ namespace Digi.ParticleEditor.UIControls
 
                                 MyGuiControlBase[] controls = new MyGuiControlBase[4 * 2];
 
+                                UINumberBox[] colorBox = new UINumberBox[4];
+
                                 for(int i = 0; i < 4; i++)
                                 {
                                     int dim = i; // required for reliable capture
@@ -898,7 +900,9 @@ namespace Digi.ParticleEditor.UIControls
                                             ChangesMade = true;
                                         });
 
-                                    float boxWidth = 0.085f - dimLabel.Size.X - host.ControlSpacing;
+                                    colorBox[i] = box;
+
+                                    float boxWidth = 0.1f - dimLabel.Size.X - host.ControlSpacing;
                                     box.Size = new Vector2(boxWidth, box.Size.Y);
 
                                     controls[i * 2] = dimLabel;
@@ -907,34 +911,37 @@ namespace Digi.ParticleEditor.UIControls
 
                                 host.PositionControlsNoSize(controls);
 
-                                /*
-                                host.InsertMultiSlider(SavedDataOB.Name, VersionSpecificInfo.ColorSlidersTooltip,
-                                    EditorUI.Vector4ColorNames,
-                                    new float[] { 0, 0, 0, 0 },
-                                    new float[] { 1, 1, 1, 1 },
-                                    new float[] { v.X, v.Y, v.Z, v.W },
-                                    null,
-                                    2, (dim, value) =>
-                                    {
-                                        AnimationKey key = keysRef[idx];
-                                        Vector4 vec = key.ValueVector4;
+                                {
+                                    MyGuiControlLabel multiplierLabel = host.CreateLabel("Multiply RGB");
 
-                                        switch(dim)
+                                    AnimationKey key = keysRef[idx];
+                                    Vector4 original = key.ValueVector4;
+
+                                    UINumberBox box = host.CreateNumberBox("Multiplies R,G,B sliders by this amount.\nRelative to original value when this UI was opened, once closed it will be applied.",
+                                        initialValue: 1, defaultValue: 1, min: 0, max: 10,
+                                        inputRound, dragRound,
+                                        (value) =>
                                         {
-                                            case 0: vec = new Vector4(value, vec.Y, vec.Z, vec.W); break;
-                                            case 1: vec = new Vector4(vec.X, value, vec.Z, vec.W); break;
-                                            case 2: vec = new Vector4(vec.X, vec.Y, value, vec.W); break;
-                                            case 3: vec = new Vector4(vec.X, vec.Y, vec.Z, value); break;
-                                        }
+                                            Vector4 changed = original;
+                                            changed.X *= value;
+                                            changed.Y *= value;
+                                            changed.Z *= value;
 
-                                        key.ValueVector4 = vec;
-                                        keysRef[idx] = key;
+                                            for(int i = 0; i < colorBox.Length; i++)
+                                            {
+                                                colorBox[i].Text = changed.GetDim(i).ToString();
+                                            }
 
-                                        updateColor(vec);
+                                            updateColor(changed);
 
-                                        ChangesMade = true;
-                                    });
-                                */
+                                            ChangesMade = true;
+                                        });
+
+                                    float boxWidth = 0.1f;
+                                    box.Size = new Vector2(boxWidth, box.Size.Y);
+
+                                    host.PositionControlsNoSize(multiplierLabel, box);
+                                }
                             }
                             else
                             {
@@ -960,7 +967,7 @@ namespace Digi.ParticleEditor.UIControls
                                             ChangesMade = true;
                                         });
 
-                                    float boxWidth = 0.085f - dimLabel.Size.X - host.ControlSpacing;
+                                    float boxWidth = 0.1f - dimLabel.Size.X - host.ControlSpacing;
                                     box.Size = new Vector2(boxWidth, box.Size.Y);
 
                                     controls[i * 2] = dimLabel;
@@ -968,33 +975,6 @@ namespace Digi.ParticleEditor.UIControls
                                 }
 
                                 host.PositionControlsNoSize(controls);
-
-                                /*
-                                host.InsertMultiSlider(SavedDataOB.Name, null,
-                                    EditorUI.Vector4AxisNames,
-                                    new float[] { min.X, min.Y, min.Z, min.W },
-                                    new float[] { max.X, max.Y, max.Z, max.W },
-                                    new float[] { v.X, v.Y, v.Z, v.W },
-                                    (def == null ? null : new float[] { def.Value.X, def.Value.Y, def.Value.Z, def.Value.W }),
-                                    2, (dim, value) =>
-                                    {
-                                        AnimationKey key = keysRef[idx];
-                                        Vector4 vec = key.ValueVector4;
-
-                                        switch(dim)
-                                        {
-                                            case 0: vec = new Vector4(value, vec.Y, vec.Z, vec.W); break;
-                                            case 1: vec = new Vector4(vec.X, value, vec.Z, vec.W); break;
-                                            case 2: vec = new Vector4(vec.X, vec.Y, value, vec.W); break;
-                                            case 3: vec = new Vector4(vec.X, vec.Y, vec.Z, value); break;
-                                        }
-
-                                        key.ValueVector4 = vec;
-                                        keysRef[idx] = key;
-
-                                        ChangesMade = true;
-                                    });
-                                */
                             }
                         };
 
