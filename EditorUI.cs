@@ -67,6 +67,12 @@ namespace Digi.ParticleEditor
 
         public EditorUI(Editor editor) : base(ScreenPosition, null, null, isTopMostScreen: true)
         {
+            base.CanBeHidden = false;
+            base.CanHideOthers = false;
+            m_canCloseInCloseAllScreenCalls = false;
+            m_canShareInput = true;
+            m_isTopScreen = true;
+
             Instance = this;
             Editor = editor;
 

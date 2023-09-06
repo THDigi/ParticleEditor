@@ -16,24 +16,19 @@ namespace Digi.ParticleEditor.UIControls
 
         public override string GetFriendlyName() => GetType().Name;
 
-        protected UIGamePassthroughScreenBase(Vector4? backgroundColor = null, bool isTopMostScreen = false)
-            : this(new Vector2(MyGuiManager.GetMaxMouseCoord().X - 0.16f, 0.5f), new Vector2(0.32f, 1f), backgroundColor ?? (0.85f * Color.Black.ToVector4()), isTopMostScreen)
-        {
-            m_closeOnEsc = true;
-            m_drawEvenWithoutFocus = true;
-            m_isTopMostScreen = false;
-            base.CanHaveFocus = false;
-            m_isTopScreen = true;
-        }
+        //protected UIGamePassthroughScreenBase(Vector4? backgroundColor = null, bool isTopMostScreen = false)
+        //    : this(new Vector2(MyGuiManager.GetMaxMouseCoord().X - 0.16f, 0.5f), new Vector2(0.32f, 1f), backgroundColor ?? (0.85f * Color.Black.ToVector4()), isTopMostScreen)
+        //{
+        //    m_closeOnEsc = true;
+        //    m_drawEvenWithoutFocus = true;
+        //    m_isTopMostScreen = false;
+        //    base.CanHaveFocus = false;
+        //    m_isTopScreen = true;
+        //}
 
         protected UIGamePassthroughScreenBase(Vector2 position, Vector2? size, Vector4? backgroundColor, bool isTopMostScreen)
             : base(position, backgroundColor, size, isTopMostScreen)
         {
-            base.CanBeHidden = false;
-            base.CanHideOthers = false;
-            m_canCloseInCloseAllScreenCalls = false;
-            m_canShareInput = true;
-            m_isTopScreen = true;
         }
 
         /// <summary>
