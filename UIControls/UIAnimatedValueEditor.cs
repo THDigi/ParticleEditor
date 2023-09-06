@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Digi.ParticleEditor.GameData;
 using Sandbox.Graphics.GUI;
+using VRage.Game;
 using VRage.Input;
 using VRage.Utils;
 using VRageMath;
@@ -44,11 +45,29 @@ namespace Digi.ParticleEditor.UIControls
             set
             {
                 if(_applyButton != null)
-                    _applyButton.ColorMask = value ? Color.Lime : Color.White;
+                {
+                    if(value)
+                        _applyButton.CustomStyle = ButtonStyle_Highlighted;
+                    else
+                        _applyButton.VisualStyle = MyGuiControlButtonStyleEnum.Rectangular;
+                }
 
                 _changesMade = value;
             }
         }
+
+        MyGuiControlButton.StyleDefinition ButtonStyle_Highlighted = new MyGuiControlButton.StyleDefinition
+        {
+            NormalTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_ACTIVE_BORDER,
+            HighlightTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_FOCUS_BORDER,
+            FocusTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_ACTIVE_BORDER,
+            ActiveTexture = MyGuiConstants.TEXTURE_RECTANGLE_BUTTON_ACTIVE_BORDER,
+            NormalFont = "White",
+            HighlightFont = "White",
+            Padding = new MyGuiBorderThickness(5f / MyGuiConstants.GUI_OPTIMAL_SIZE.X, 5f / MyGuiConstants.GUI_OPTIMAL_SIZE.Y),
+            TextColorFocus = Color.White,
+            BackgroundColor = new Color(100, 200, 120),
+        };
 
         Dictionary<int, bool> SingleValueMode = new Dictionary<int, bool>();
 
