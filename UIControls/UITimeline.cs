@@ -404,16 +404,16 @@ namespace Digi.ParticleEditor.UIControls
                     }
                 }
 
-                if(GetKeyTooltip != null && (MovingKey != null || wasAimed != (AimedKey != null)))
                 {
                     bool useGeneral = true;
+                    Key keyForTooltip = MovingKey ?? AimedKey;
 
-                    if(AimedKey != null)
+                    if(keyForTooltip != null)
                     {
-                        int index = Keys.IndexOf(AimedKey);
+                        int index = Keys.IndexOf(keyForTooltip);
                         if(index != -1)
                         {
-                            string text = $"At particle lifetime: {Math.Round(AimedKey.Position * 100, 2)}%";
+                            string text = $"At particle lifetime: {Math.Round(keyForTooltip.Position * 100, 2)}%";
 
                             if(GetKeyTooltip != null)
                                 text += "\n" + GetKeyTooltip.Invoke(index);
