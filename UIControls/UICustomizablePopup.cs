@@ -5,7 +5,7 @@ using VRageMath;
 
 namespace Digi.ParticleEditor.UIControls
 {
-    public class UICustomizablePopup : MyGuiScreenBase
+    public class UICustomizablePopup : UIGamePassthroughScreenBase
     {
         VerticalControlsHost Host;
 
@@ -19,7 +19,7 @@ namespace Digi.ParticleEditor.UIControls
         public override string GetFriendlyName() => nameof(UICustomizablePopup);
 
         public UICustomizablePopup(string closeButtonTooltip = null, Vector2? screenPosition = null, Vector2? screenSize = null)
-            : base(screenPosition ?? DefaultScreenPosition, size: screenSize ?? DefaultScreenSize, isTopMostScreen: false)
+            : base(screenPosition ?? DefaultScreenPosition, size: screenSize ?? DefaultScreenSize, backgroundColor: null, isTopMostScreen: false)
         {
             CloseButtonTooltip = closeButtonTooltip;
             Align = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_BOTTOM;
@@ -53,6 +53,14 @@ namespace Digi.ParticleEditor.UIControls
             ControlGetter?.Invoke(Host);
         }
 
+        public override void HandleInput(bool receivedFocusInThisUpdate)
+        {
+            // allow game control by holding RMB
+            if(ComputeGameControlPassThrough(receivedFocusInThisUpdate, Host.Panel.Rectangle))
+                return;
+
+            base.HandleInput(receivedFocusInThisUpdate);
+        }
 
 
         // TODO: allow RMB to free move and all that stuff
