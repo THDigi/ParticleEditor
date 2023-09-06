@@ -217,7 +217,7 @@ namespace Digi.ParticleEditor
                 //    }
                 //}
 
-                if(DrawPivot)
+                if(DrawPivot || DrawEmitters || DrawLights)
                 {
                     const float LineLength = 1f;
                     const float LineThick = 0.01f;
@@ -237,22 +237,25 @@ namespace Digi.ParticleEditor
                         worldMatrix *= character.WorldMatrix;
                     }
 
-                    float alpha = 1f;
-                    float distance = (float)Vector3D.Distance(worldMatrix.Translation, MySector.MainCamera.Position);
-                    distance = Math.Max(0, distance - 0.5f);
-                    if(distance <= 1f)
-                        alpha = distance;
-
-                    if(alpha > 0)
+                    if(DrawPivot)
                     {
-                        MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Red * alpha, localMatrix.Translation, parentId, localMatrix.Right, LineLength, LineThick, Blend);
-                        MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Lime * alpha, localMatrix.Translation, parentId, localMatrix.Up, LineLength, LineThick, Blend);
-                        MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Blue * alpha, localMatrix.Translation, parentId, localMatrix.Backward, LineLength, LineThick, Blend);
-                    }
+                        float alpha = 1f;
+                        float distance = (float)Vector3D.Distance(worldMatrix.Translation, MySector.MainCamera.Position);
+                        distance = Math.Max(0, distance - 0.5f);
+                        if(distance <= 1f)
+                            alpha = distance;
 
-                    if(DrawEmitters || DrawLights)
-                    {
-                        MyRenderProxy.DebugDrawText3D(worldMatrix.Translation, "Pivot", Color.White, TextScale, true, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+                        if(alpha > 0)
+                        {
+                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Red * alpha, localMatrix.Translation, parentId, localMatrix.Right, LineLength, LineThick, Blend);
+                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Lime * alpha, localMatrix.Translation, parentId, localMatrix.Up, LineLength, LineThick, Blend);
+                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Blue * alpha, localMatrix.Translation, parentId, localMatrix.Backward, LineLength, LineThick, Blend);
+                        }
+
+                        if(DrawEmitters || DrawLights)
+                        {
+                            MyRenderProxy.DebugDrawText3D(worldMatrix.Translation, "Pivot", Color.White, TextScale, true, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+                        }
                     }
 
                     if(DrawEmitters)
