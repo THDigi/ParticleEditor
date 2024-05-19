@@ -3,6 +3,7 @@ using System.Reflection;
 using Sandbox.Game.GUI;
 using Sandbox.Graphics;
 using Sandbox.Graphics.GUI;
+using VRage;
 using VRage.Audio;
 using VRage.Input;
 using VRage.Utils;
@@ -22,8 +23,10 @@ namespace Digi.ParticleEditor.UIControls
 
         public event Action<float> NumberChanged;
 
-        double ValueAtClick;
-        Vector2 MousePosAtClick;
+        bool Dragging = false;
+        Vector2 DragInitialMousePos;
+        double DragInitialValue;
+        double DragAmount;
 
         Action<MyGuiControlTextbox, MyRectangle2D> TextAreaRelativeSetter;
 
@@ -175,61 +178,77 @@ namespace Digi.ParticleEditor.UIControls
                 return this;
             }
 
-            if(IsMouseOver && MyInput.Static.IsMousePressed(MouseButton))
+            bool dragStartedThisUpdate = false;
+
+            if(IsMouseOver && MyInput.Static.IsNewMousePressed(MouseButton))
             {
-                bool justPressed = MyInput.Static.IsNewMousePressed(MouseButton);
+                Dragging = true;
+                dragStartedThisUpdate = true;
+            }
 
-                Vector2 mousePos = MyGuiManager.MouseCursorPosition;
-
-                if(double.TryParse(Text, out double value))
+            if(Dragging)
+            {
+                if(MyInput.Static.IsMousePressed(MouseButton))
                 {
-                    if(justPressed)
+                    if(string.IsNullOrWhiteSpace(Text))
                     {
-                        ValueAtClick = value;
-                        MousePosAtClick = mousePos;
+                        Text = (Min > 0 ? Min.ToString() : "0");
                     }
 
-                    float dragToRegister = 0.02f;
-                    const float DistanceDragScale = 7f / 1f;
-
-                    float dragDistance = Math.Abs(MousePosAtClick.X - mousePos.X);
-                    if(dragDistance > dragToRegister)
+                    if(double.TryParse(Text, out double value))
                     {
-                        dragDistance -= dragToRegister;
-                        double amount = (dragDistance * DistanceDragScale * DragValueMultiplier);
+                        Vector2 mousePos = MyVRage.Platform.Input.MousePosition;
+                        Vector2 mouseArea = MyVRage.Platform.Input.MouseAreaSize;
 
-                        amount = Math.Round(amount, DragRound);
+                        if(dragStartedThisUpdate)
+                        {
+                            DragAmount = 0;
+                            DragInitialValue = value;
+                            DragInitialMousePos = mousePos;
+                        }
 
-                        if(mousePos.X > MousePosAtClick.X)
-                            value = ValueAtClick + amount;
-                        else
-                            value = ValueAtClick - amount;
+                        MyVRage.Platform.Input.MousePosition = DragInitialMousePos;
 
-                        value = MathHelper.Clamp(value, Min, Max);
+                        float diff = (mousePos.X - DragInitialMousePos.X);
 
-                        if(MyInput.Static.IsAnyCtrlKeyPressed())
-                            value = Math.Round(value, DragRound / 2);
-                        else
-                            value = Math.Round(value, DragRound);
+                        if(MyInput.Static.IsKeyPress(MyKeys.R))
+                        {
+                            DragAmount = 0;
+                            diff = 0;
+                            value = DragInitialValue;
+                        }
+
+                        if(Math.Abs(diff) > 0f)
+                        {
+                            DragAmount += (diff / mouseArea.X) * 3f * DragValueMultiplier;
+                            DragAmount = MathHelper.Clamp(DragInitialValue + DragAmount, Min, Max) - DragInitialValue;
+
+                            value = DragInitialValue + DragAmount;
+
+                            if(MyInput.Static.IsAnyCtrlKeyPressed())
+                                value = Math.Round(value, DragRound / 2);
+                            else
+                                value = Math.Round(value, DragRound);
+                        }
+
+                        Text = value.ToString();
+
+                        MoveCarriageToEnd();
                     }
                     else
                     {
-                        value = ValueAtClick;
+                        if(dragStartedThisUpdate)
+                        {
+                            MyGuiAudio.PlaySound(MyGuiSounds.HudUnable);
+                        }
                     }
 
-                    Text = value.ToString();
-
-                    MoveCarriageToEnd();
+                    return this;
                 }
                 else
                 {
-                    if(justPressed)
-                    {
-                        MyGuiAudio.PlaySound(MyGuiSounds.HudUnable);
-                    }
+                    Dragging = false;
                 }
-
-                return this;
             }
 
             // auto-focus on hover, auto-unfocus on unhover (which also prevents input reading).
