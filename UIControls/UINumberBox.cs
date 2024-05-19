@@ -101,9 +101,9 @@ namespace Digi.ParticleEditor.UIControls
             DragRound = dragRound;
             DefaultValue = defaultValue;
 
-            if(inputRound == 1)
+            if(DragRound == 1)
                 DragValueMultiplier = 10;
-            else if(inputRound == 0)
+            else if(DragRound == 0)
                 DragValueMultiplier = 100;
 
             string help = $"Hold RMB and drag horizontally to adjust.\nWhile dragging, hold Ctrl to round to {DragRound / 2}\nPress C to clear the text box.";

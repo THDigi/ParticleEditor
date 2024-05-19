@@ -486,7 +486,7 @@ namespace Digi.ParticleEditor.GameData
             {
                 NameFallback = "Max view distance",
                 TooltipFixup = EditorUI.GetDescriptionAttrib(typeof(MyParticleEffectData), nameof(EditorUI.DefaultData.DistanceMax)),
-                ValueRangeNum = new ValueInfo<float>(0, float.MaxValue),
+                ValueRangeNum = new ValueInfo<float>(0, float.MaxValue, round: 0, inputRound: 2),
             },
 
             [new PropId(PropType.General, nameof(EditorUI.DefaultData.DurationMin))] = new PropertyData() // float
