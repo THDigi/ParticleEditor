@@ -231,7 +231,6 @@ namespace Digi.ParticleEditor
                 if(DrawPivot || DrawEmitters || DrawLights)
                 {
                     const float LineLength = 1f;
-                    const float LineThick = 0.01f;
                     const float TextScale = 0.6f;
                     const float PointRadius = 0.05f;
                     const MyBillboard.BlendTypeEnum Blend = MyBillboard.BlendTypeEnum.PostPP;
@@ -258,9 +257,11 @@ namespace Digi.ParticleEditor
 
                         if(alpha > 0)
                         {
-                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Red * alpha, localMatrix.Translation, parentId, localMatrix.Right, LineLength, LineThick, Blend);
-                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Lime * alpha, localMatrix.Translation, parentId, localMatrix.Up, LineLength, LineThick, Blend);
-                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialLaser, Color.Blue * alpha, localMatrix.Translation, parentId, localMatrix.Backward, LineLength, LineThick, Blend);
+                            float thick = MathHelper.Clamp(distance * 0.0025f, 0.01f, 0.1f);
+
+                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialSquare, Color.Red * alpha, localMatrix.Translation, parentId, localMatrix.Right, LineLength, thick, Blend);
+                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialSquare, Color.Lime * alpha, localMatrix.Translation, parentId, localMatrix.Up, LineLength, thick, Blend);
+                            MyTransparentGeometry.AddLocalLineBillboard(EditorUI.MaterialSquare, Color.Blue * alpha, localMatrix.Translation, parentId, localMatrix.Backward, LineLength, thick, Blend);
                         }
 
                         if(DrawEmitters || DrawLights)
