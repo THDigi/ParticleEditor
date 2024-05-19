@@ -1338,11 +1338,11 @@ namespace Digi.ParticleEditor.UIControls
                     else
                     {
                         AddItem("Add key  (A)",
-                            "Creates a new key at the aimed position",
+                            "Creates a new key at the aimed position with a default value",
                             userData: new Action(timeline.ContextMenu_Add));
 
                         AddItem("Add interpolated key  (i)",
-                            "Creates a new key with value interpolated between closest left and right keys.",
+                            "Creates a new key with time and value half-way between the 2 nearby keys.",
                             userData: new Action(timeline.ContextMenu_AddInterpolated));
 
                         AddItem("Paste new   (V)",
