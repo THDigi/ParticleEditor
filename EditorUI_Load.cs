@@ -662,7 +662,7 @@ Tag: {data.Tag}";
                 if(lastLoadedData != null)
                 {
                     SelectedParticle.Spawn(lastLoadedData.Name);
-                    SelectedParticle.ParentDistance = Math.Max(2f, EstimateParticleTotalRadius(lastLoadedData) * 0.6f);
+                    SelectedParticle.ParentDistance = ParentingDistanceOnLoad(lastLoadedData);
                     SelectedParticle.HasChanges = false;
 
                     CheckForZeroViewDistance(lastLoadedData);
@@ -752,7 +752,7 @@ Tag: {data.Tag}";
             }
 
             SelectedParticle.HasChanges = false;
-            SelectedParticle.ParentDistance = Math.Max(2f, EstimateParticleTotalRadius(SelectedParticle.Data) * 0.6f);
+            SelectedParticle.ParentDistance = ParentingDistanceOnLoad(SelectedParticle.Data);
             SelectedParticle.OriginalData = OriginalParticleData.GetValueOrDefault(name); // HACK: fixing original data not being there in first load because it gets assigned in Spawn()
 
             CheckForZeroViewDistance(SelectedParticle.Data);
@@ -761,6 +761,11 @@ Tag: {data.Tag}";
             Editor.Backup.ShouldBackup = false;
 
             RefreshUI();
+        }
+
+        static float ParentingDistanceOnLoad(MyParticleEffectData data)
+        {
+            return Math.Max(1f, EstimateParticleTotalRadius(data) * 0.25f);
         }
 
         static void CheckForZeroViewDistance(MyParticleEffectData data)
