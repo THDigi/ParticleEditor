@@ -205,7 +205,10 @@ namespace Digi.ParticleEditor
             if(SpawnedEffect == null)
                 return;
 
-            SpawnedEffect.Data.SetDirty();
+            SpawnedEffect.Data?.SetDirty(); // Data goes null when effect is finished playing (non-loop)
+
+            SpawnedEffect.OnDelete -= EffectOnDelete;
+
             VersionSpecificInfo.RemoveParticle(SpawnedEffect);
             SpawnedEffect = null;
         }
@@ -292,6 +295,12 @@ namespace Digi.ParticleEditor
                                             $"TryCreateParticleEffect() simply refused to do it.\n" +
                                             $"ExistsInLib={(particleData != null)}; Enabled={(particleData?.Enabled.ToString() ?? "N/A")}", MyMessageBoxStyleEnum.Error);
             }
+
+            SpawnedEffect.OnDelete += EffectOnDelete;
+        }
+
+        void EffectOnDelete(MyParticleEffect _)
+        {
         }
     }
 }

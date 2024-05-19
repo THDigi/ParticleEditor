@@ -69,7 +69,7 @@ namespace Digi.ParticleEditor
                     double distance = 0;
 
                     SB.Clear();
-                    SB.Append(effect.GetName()).Append('\n');
+                    SB.Append(effect.Data != null ? effect.GetName() : "(Data=null)").Append('\n');
 
                     if(parentId != uint.MaxValue)
                     {
