@@ -265,11 +265,13 @@ namespace Digi.ParticleEditor
 
             Host.InsertSeparator();
 
-            Host.InsertCheckbox("Periodically backup",
-                                $"Backs up changed particles every {(Backup.BackupEveryTicks / 60)}s to:\n'{Backup.BackupPath}\\*.sbc'.\nDoes not get saved in any config.\nAlso, regardless of this setting, if the game crashes this plugin will backup your current particle.",
-                EditorUI.Editor.Backup.Enabled, (value) =>
+            Host.InsertCheckbox("Backup on changes",
+                                $"When changed, it automatically saves up to 2 copies of the particle to '{Backup.BackupPath}\\*.sbc'." +
+                                $"\nThis checkbox does not get saved in any config." +
+                                $"\nIf game crashes, the plugin will backup the particle (unless plugin suspects particle caused it) regardless of this checkbox.",
+                EditorUI.Editor.Backup.Enable, (value) =>
                 {
-                    EditorUI.Editor.Backup.Enabled = value;
+                    EditorUI.Editor.Backup.Enable = value;
                 });
         }
 

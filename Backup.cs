@@ -3,8 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sandbox;
-using Sandbox.Engine.Platform.VideoMode;
-using Sandbox.Game.World;
 using Sandbox.Graphics;
 using VRage.FileSystem;
 using VRage.Game;
@@ -17,7 +15,7 @@ namespace Digi.ParticleEditor
 {
     public class Backup : EditorComponentBase
     {
-        public bool Enabled = true;
+        public bool Enable = true;
 
         bool _shouldBackup;
         public bool ShouldBackup
@@ -32,20 +30,17 @@ namespace Digi.ParticleEditor
             }
         }
 
-        double ShouldBackupAt = -1;
+        DateTime? ShouldBackupAt;
 
-        bool ShowBackupIcon = false;
+        bool ShowMessage = false;
         Task BackupTask;
-        double BackupFinsihedAt;
+        DateTime? MessageHideAt;
+        DateTime Time => DateTime.Now;
 
-        const double BackupIconFade = 1;
-
-        public const int BackupEveryTicks = 60 * 10;
         public static string BackupPath = Path.Combine(MyFileSystem.UserDataPath, @"ParticleEditor\Backups");
         public const string CrashedTokenFile = "LastWasCrash.token";
 
         ParticleHandler SelectedParticle => EditorUI.SelectedParticle;
-        double Time => MySession.Static.ElapsedGameTime.TotalSeconds;
 
         bool CheckedAskFile = false;
 
@@ -63,6 +58,33 @@ namespace Digi.ParticleEditor
         public override void Dispose()
         {
             AppDomain.CurrentDomain.UnhandledException -= UnhandledException;
+        }
+
+        public override void Update()
+        {
+            if(Enable && ShouldBackupAt != null && Time >= ShouldBackupAt)
+            {
+                ShouldBackupAt = null;
+                BackupCurrentParticle();
+            }
+
+            if(ShowMessage)
+            {
+                if(Editor.ShowEditor)
+                {
+                    bool inProgress = MessageHideAt == null;
+                    string text = inProgress ? "Backing up..." : "Backed up!";
+                    Color color = inProgress ? Color.Gray : Color.White; // inProgress ? Color.Yellow : Color.Lime;
+
+                    MyRenderProxy.DebugDrawText2D(MyGuiManager.GetHudPixelCoordFromNormalizedCoord(new Vector2(0.5f, 0.01f)), text, color, 0.5f, MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_CENTER);
+                }
+
+                if(MessageHideAt != null && Time >= MessageHideAt.Value)
+                {
+                    MessageHideAt = null;
+                    ShowMessage = false;
+                }
+            }
         }
 
         void EditorVisibleChanged(bool visible)
@@ -97,22 +119,13 @@ namespace Digi.ParticleEditor
             }
         }
 
-        public override void Update()
-        {
-            if(MySession.Static.GameplayFrameCounter % BackupEveryTicks == 0)
-            {
-                // prevent backing up right after a change in case it crashes
-                if(ShouldBackupAt <= 0 || Time >= ShouldBackupAt)
-                    BackupCurrentParticle();
-            }
-        }
-
         void SelectedParticle_ChangesMade()
         {
             ShouldBackup = true;
 
-            if(ShouldBackupAt <= 0)
-                ShouldBackupAt = Time + 3;
+            // back up a bit later in case the change causes a crash
+            if(ShouldBackupAt == null)
+                ShouldBackupAt = Time + TimeSpan.FromSeconds(5);
         }
 
         public void BackupCurrentParticle()
@@ -121,40 +134,17 @@ namespace Digi.ParticleEditor
             {
                 ShouldBackup = false;
 
-                if(!Enabled || SelectedParticle.Name == null || !SelectedParticle.HasChanges)
+                if(SelectedParticle.Name == null || !SelectedParticle.HasChanges)
                     return;
 
                 if(BackupTask == null || BackupTask.IsCompleted)
                 {
+                    ShowMessage = true;
+
                     string name = SelectedParticle.Name;
                     MyObjectBuilder_ParticleEffect particleOB = MyParticleEffectDataSerializer.SerializeToObjectBuilder(SelectedParticle.Data);
 
                     BackupTask = Task.Run(() => BackupParticle(name, particleOB));
-
-                    ShowBackupIcon = true;
-                }
-
-                if(ShowBackupIcon || Time <= (BackupFinsihedAt + BackupIconFade))
-                {
-                    // TODO: needs minimum display time to not be just an unreadable flicker
-
-                    //MyGuiManager.DrawSprite("", new Vector2(0.1f, 0.1f), Color.White, false, false);
-
-                    Color color = Color.White;
-
-                    string text = "Backing up...";
-                    if(!ShowBackupIcon)
-                        text = "Backed up!";
-
-                    if(Time >= BackupFinsihedAt)
-                    {
-                        color = Color.Lime * (float)MathHelper.Clamp((Time - BackupFinsihedAt) / BackupIconFade, 0, 1);
-                    }
-
-                    MyGuiManager.DrawString("Debug", text, new Vector2(0.4f, 0.01f), 0.5f, color, MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP, MyVideoSettingsManager.IsTripleHead());
-
-
-                    MyRenderProxy.DebugDrawText2D(new Vector2(10, 10), "Backing up particle...", color, 0.5f, MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP);
                 }
             }
             catch(Exception e)
@@ -196,7 +186,7 @@ namespace Digi.ParticleEditor
 
                 if(!EditorUI.SerializeToXML(filePath, definitionsOB))
                 {
-                    Notifications.Show($"Failed to backup particle {particleOB.Id.SubtypeName} ! Check SE log.", 5, Color.Red);
+                    Notifications.Show($"Failed to backup particle '{particleOB.Id.SubtypeName}'! Check SE log.", 5, Color.Red);
                 }
             }
             catch(Exception e)
@@ -204,8 +194,7 @@ namespace Digi.ParticleEditor
                 Log.Error(e);
             }
 
-            BackupFinsihedAt = Time;
-            ShowBackupIcon = false;
+            MessageHideAt = Time + TimeSpan.FromSeconds(1);
         }
 
         void InsertUnhandledExceptionHandler()
