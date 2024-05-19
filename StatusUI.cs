@@ -40,6 +40,7 @@ namespace Digi.ParticleEditor
 
         MyGuiControlLabel LabelElapsedTime;
         MyGuiControlLabel LabelLoopTime;
+        MyGuiControlLabel LabelPlayStatus;
 
         MyGuiControlCheckbox CbParentParticle;
 
@@ -158,10 +159,11 @@ namespace Digi.ParticleEditor
 
             Host.PositionControlsNoSize(cbPivot, cbEmitters, cbLights);
 
-            LabelElapsedTime = Host.CreateLabel($"{ElapsedPrefix} N/A       ");
-            LabelLoopTime = Host.CreateLabel($"{LoopPrefix} N/A       ");
+            LabelElapsedTime = Host.CreateLabel($"{ElapsedPrefix} 0.0000  ");
+            LabelLoopTime = Host.CreateLabel($"{LoopPrefix} 0.0000  ");
+            LabelPlayStatus = Host.CreateLabel("  Finished  ");
 
-            Host.PositionControlsNoSize(LabelElapsedTime, LabelLoopTime);
+            Host.PositionControlsNoSize(LabelElapsedTime, LabelLoopTime, LabelPlayStatus);
 
             Host.ResizeY();
 
@@ -191,6 +193,15 @@ namespace Digi.ParticleEditor
                 {
                     SelectedParticle.Refresh(false);
                 }
+
+                // TODO: figure out some proper pausing; issues: doesn't pause elapsed time; gets deleted; breaks if gets deleted
+                //if(canReadInputs && MyInput.Static.IsNewKeyPressed(MyKeys.Q))
+                //{
+                //    if(SelectedParticle.SpawnedEffect.IsEmittingStopped)
+                //        SelectedParticle.SpawnedEffect.Play();
+                //    else
+                //        SelectedParticle.SpawnedEffect.Pause();
+                //}
 
                 if(canReadInputs && MyInput.Static.IsNewKeyPressed(MyKeys.R))
                 {
@@ -292,6 +303,7 @@ namespace Digi.ParticleEditor
             {
                 LabelElapsedTime.Text = $"{ElapsedPrefix} N/A";
                 LabelLoopTime.Text = $"{LoopPrefix} N/A";
+                LabelPlayStatus.Text = "";
 
                 if(SelectedParticle.SpawnedEffect != null)
                 {
@@ -300,10 +312,15 @@ namespace Digi.ParticleEditor
                     //GetGetters();
 
                     if(GetElapsedTime != null)
-                        LabelElapsedTime.Text = $"{ElapsedPrefix} {GetElapsedTime.Invoke():0.###}";
+                        LabelElapsedTime.Text = $"{ElapsedPrefix} {GetElapsedTime.Invoke():0.0000}";
 
                     if(GetLoopTime != null)
-                        LabelLoopTime.Text = $"{LoopPrefix} {GetLoopTime.Invoke():0.###}";
+                        LabelLoopTime.Text = $"{LoopPrefix} {GetLoopTime.Invoke():0.0000}";
+
+                    if(SelectedParticle.SpawnedEffect.Data == null)
+                        LabelPlayStatus.Text = "Finished";
+                    else
+                        LabelPlayStatus.Text = "Playing";
                 }
             }
         }
@@ -354,7 +371,7 @@ namespace Digi.ParticleEditor
                         }
                     }
                 }
-                catch(InvalidOperationException e)
+                catch(InvalidOperationException)
                 {
                     // HACK: ignore collection modified here :(
                 }
