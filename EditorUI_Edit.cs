@@ -152,6 +152,19 @@ namespace Digi.ParticleEditor
 
                 try
                 {
+                    if(DrawOnlySelected)
+                    {
+                        RestoreEnabled();
+                    }
+
+                    MyObjectBuilder_Definitions definitionsOB = new MyObjectBuilder_Definitions()
+                    {
+                        ParticleEffects = new MyObjectBuilder_ParticleEffect[]
+                        {
+                            MyParticleEffectDataSerializer.SerializeToObjectBuilder(SelectedParticle.Data),
+                        },
+                    };
+
                     string fileName = SelectedParticle.Name;
 
                     foreach(char c in Path.GetInvalidFileNameChars())
@@ -163,13 +176,9 @@ namespace Digi.ParticleEditor
                     {
                         try
                         {
-                            MyObjectBuilder_ParticleEffect particleOB = MyParticleEffectDataSerializer.SerializeToObjectBuilder(SelectedParticle.Data);
-                            MyObjectBuilder_Definitions definitionsOB = new MyObjectBuilder_Definitions();
-                            definitionsOB.ParticleEffects = new MyObjectBuilder_ParticleEffect[] { particleOB };
-
                             if(EditorUI.SerializeToXML(filePath, definitionsOB))
                             {
-                                Notifications.Show($"Succesfully saved {SelectedParticle.Name} to:\n{filePath}", 5);
+                                Notifications.Show($"Succesfully saved {SelectedParticle.Name} to:\n{filePath}", 5, Color.LimeGreen);
                             }
                         }
                         catch(Exception e)
@@ -181,6 +190,7 @@ namespace Digi.ParticleEditor
                 catch(Exception e)
                 {
                     Log.Error(e);
+                    Editor.Backup.BackupCurrentParticle();
                 }
                 finally
                 {
