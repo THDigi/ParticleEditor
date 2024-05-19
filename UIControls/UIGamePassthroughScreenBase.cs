@@ -14,6 +14,8 @@ namespace Digi.ParticleEditor.UIControls
         bool HandlingOtherInputs = false;
         Vector2 RememberMouse = Vector2.Zero;
 
+        public bool GamePassThrough { get; private set; }
+
         public override string GetFriendlyName() => GetType().Name;
 
         //protected UIGamePassthroughScreenBase(Vector4? backgroundColor = null, bool isTopMostScreen = false)
@@ -37,7 +39,7 @@ namespace Digi.ParticleEditor.UIControls
         protected bool ComputeGameControlPassThrough(bool receivedFocusInThisUpdate, RectangleF? guiArea1 = null, RectangleF? guiArea2 = null, RectangleF? guiArea3 = null)
         {
             if(HandlingOtherInputs) // prevent infinite loops
-                return true;
+                return (GamePassThrough = true);
 
             if(!DrawMouseCursor)
             {
@@ -79,7 +81,7 @@ namespace Digi.ParticleEditor.UIControls
             if(!DrawMouseCursor)
             {
                 if(newPressed) // ignore first frame of press to avoid triggering stuff in world like when aiming at conveyor ports.
-                    return true;
+                    return (GamePassThrough = true);
 
                 try
                 {
@@ -96,10 +98,10 @@ namespace Digi.ParticleEditor.UIControls
                     HandlingOtherInputs = false; // ensure this gets false
                 }
 
-                return true;
+                return (GamePassThrough = true);
             }
 
-            return false;
+            return (GamePassThrough = false);
         }
     }
 }

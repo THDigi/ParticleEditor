@@ -98,20 +98,20 @@ namespace Digi.ParticleEditor
             if(focusScreen == null)
                 return false;
 
+            // normal gameplay
             if(focusScreen is MyGuiScreenGamePlay)
                 return true;
 
+            // if currently controlling the game, allow all inputs regardless of where mouse is
+            if(focusScreen is UIGamePassthroughScreenBase passThrough && passThrough.GamePassThrough)
+                return true;
+
+            // if not controlling game and using a screen that allows hotkeys, check if they're allowed depending on where mouse is
             if(focusScreen is IScreenAllowHotkeys allowHotkeys && allowHotkeys.IsAllowed(MyGuiManager.MouseCursorPosition))
                 return true;
 
+            // in a screen that doesn't specify it allows hotkeys, so don't.
             return false;
-
-            //if(focusScreen is ValueGetScreenWithCaption
-            //|| focusScreen is MyGuiScreenDialogAmount
-            //|| focusScreen is MyGuiScreenDialogText)
-            //    return false;
-
-            //return true;
         }
 
         public static Color TransitionAlpha(Vector4 color, float transition)
