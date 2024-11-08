@@ -646,15 +646,16 @@ Tag: {data.Tag}";
                         {
                             AddOrReplaceParticleOB(particleOB);
                         }
+
+                        FinalizeLoading();
                     }, MyMessageBoxStyleEnum.Error);
                     return;
                 }
                 else
                 {
                     AddOrReplaceParticleOB(particleOB);
+                    FinalizeLoading();
                 }
-
-                FinalizeLoading();
             }
 
             void FinalizeLoading()

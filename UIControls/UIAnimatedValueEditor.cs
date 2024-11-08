@@ -433,6 +433,8 @@ namespace Digi.ParticleEditor.UIControls
                         buttonTooltip = "Switch back to a timeline editor which allows values over particle lifetime.";
                     }
 
+                    // TODO: fix this changing from timeline to single and applying not doing anything until the single value is actually modified.
+
                     editModeButton = ScrollHost.CreateButton(buttonTitle, buttonTooltip,
                         clicked: (b) =>
                         {
