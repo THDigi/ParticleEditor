@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleEditor", "ParticleEditor.csproj", "{69591029-510B-408E-8FD0-BEFDC46E45C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleEditorLauncher", "..\ParticleEditorLauncher\ParticleEditorLauncher.csproj", "{08F9EFEF-D569-4334-928E-EC31F811D620}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{69591029-510B-408E-8FD0-BEFDC46E45C8}.Debug|x64.Build.0 = Debug|x64
 		{69591029-510B-408E-8FD0-BEFDC46E45C8}.Release|x64.ActiveCfg = Release|x64
 		{69591029-510B-408E-8FD0-BEFDC46E45C8}.Release|x64.Build.0 = Release|x64
+		{08F9EFEF-D569-4334-928E-EC31F811D620}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{08F9EFEF-D569-4334-928E-EC31F811D620}.Debug|x64.Build.0 = Debug|Any CPU
+		{08F9EFEF-D569-4334-928E-EC31F811D620}.Release|x64.ActiveCfg = Release|x64
+		{08F9EFEF-D569-4334-928E-EC31F811D620}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
