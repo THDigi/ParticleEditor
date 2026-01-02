@@ -6,14 +6,26 @@ A plugin for Space Engineers game to allow modders to develop particles much eas
 
 
 ## Install:
-As of SE v202 the `-plugin` launch arg no longer exists ([official statement](https://www.spaceengineersgame.com/plugins/))
+Pick one:
 
-You have to install [Plugin Loader](https://github.com/sepluginloader/PluginLoader) and after that the Particle Editor will be in its plugins list.
+### Standalone way
+- Download `ParticleEditor.dll` and `ParticleEditorLauncher.exe` from the [Releases](https://github.com/THDigi/ParticleEditor/releases) page.
+- Place them in your game's Bin64 folder.
+- Start ParticleEditorLauncher.exe.
 
+### Third party plugin launcher way
+Find a plugin launcher that you can trust. It most likely has this plugin in its list (as a lot of them inherited the [discontinued PluginLoader](https://github.com/sepluginloader/PluginLoader)'s list).  
+I cannot recomend any particular launcher though.
+
+If your chosen launcher doesn't have this plugin in its list you can either ask them to add it, or if it allows you to bring your own .dlls then you can download only the `ParticleEditor.dll` from the [Releases](https://github.com/THDigi/ParticleEditor/releases) page, and refer to the launcher's documentation on how to load a .dll file.
+
+The game itself used to support plugins but as of SE v202 the `-plugin` launch arg was (understandably) removed, [official statement](https://www.spaceengineersgame.com/plugins/).
 
 ## Usage: 
-Launch the game, load any offline world and press `Shift+F` to open the editor.
+In the game, load any offline world.
+Once spawned ensure you're first person view and press `Shift+F` to open the editor which will now ask you to either pick an existing particle or create a blank one.
 
-Past this you will have tooltips for everything, mentioning hotkeys and such.
+From here onwards you'll have only the tooltips from the program itself, if anything is unclear then hover it!  
+For questions about this or particles in general, ask in the [Keen discord server](https://discord.gg/keenswh)'s `#modding-art-sbc` channel.
 
-There is still much to be improved so feedback and bugreports are welcome in the [Issues](https://github.com/THDigi/ParticleEditor/issues) tab.
+Feedback and bugreports are welcome in the [Issues](https://github.com/THDigi/ParticleEditor/issues) tab.
