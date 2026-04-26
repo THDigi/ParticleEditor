@@ -153,32 +153,32 @@ namespace Digi.ParticleEditor
             }
         }
 
-        void BackupParticle(string fileNameNoExtension, MyObjectBuilder_ParticleEffect particleOB)
+        void BackupParticle(string fileNameNoExt, MyObjectBuilder_ParticleEffect particleOB)
         {
             try
             {
-                string fileName = fileNameNoExtension;
-
                 foreach(char c in Path.GetInvalidFileNameChars())
                 {
-                    fileName = fileName.Replace(c, '_');
+                    fileNameNoExt = fileNameNoExt.Replace(c, '_');
                 }
 
-                fileName += ".sbc";
+                string fileName = fileNameNoExt + ".sbc";
 
                 Directory.CreateDirectory(BackupPath);
 
                 string filePath = Path.Combine(BackupPath, fileName);
-                string oldFile = Path.Combine(BackupPath, fileName + " (previous).sbc");
+                string prevFile = Path.Combine(BackupPath, fileNameNoExt + " (previous).sbc");
+                string prevFileWrong = Path.Combine(BackupPath, fileName + " (previous).sbc"); // resulted in "file.sbc (previous).sbc", now deleting these
 
                 if(File.Exists(filePath))
                 {
-                    if(File.Exists(oldFile))
-                    {
-                        File.Delete(oldFile);
-                    }
+                    if(File.Exists(prevFileWrong))
+                        File.Delete(prevFileWrong);
 
-                    File.Move(filePath, oldFile);
+                    if(File.Exists(prevFile))
+                        File.Delete(prevFile);
+
+                    File.Move(filePath, prevFile);
                 }
 
                 MyObjectBuilder_Definitions definitionsOB = new MyObjectBuilder_Definitions();
