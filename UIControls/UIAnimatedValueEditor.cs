@@ -211,7 +211,7 @@ namespace Digi.ParticleEditor.UIControls
             MyGuiControlButton helpButton = Host.CreateButton("Help", (Is2D ? VersionSpecificInfo.AnimatedProp2DHelp : VersionSpecificInfo.AnimatedProp1DHelp));
 
             MyGuiControlLabel labelMinKeys = Host.CreateLabel(Is2D ? $"Min keys: {PropInfo.RequiredKeys1D} vertical, {PropInfo.RequiredKeys2D} horizontal" : $"Min keys: {PropInfo.RequiredKeys1D} horizontal");
-            labelMinKeys.SetToolTip("The minimum amount of keys on each axis that this property requires to not crash the game.\nThese values are enforced on apply but not enforced in XML editor.");
+            labelMinKeys.SetToolTip("The minimum amount of keys on each axis that this property requires to not crash the game.\nThese values are enforced on apply but not enforced in the XML editor.");
 
             Host.PositionControlsNoSize(labelTitle, helpButton, labelMinKeys);
 
@@ -721,7 +721,7 @@ namespace Digi.ParticleEditor.UIControls
                 }
             }
 
-            MyGuiControlButton addKeyButton = ScrollHost.CreateButton("Add key",
+            MyGuiControlButton addKeyButton = ScrollHost.CreateButton("Add vertical",
                 clicked: (b) =>
                 {
                     List<AnimationKey> keysRef = new List<AnimationKey>();

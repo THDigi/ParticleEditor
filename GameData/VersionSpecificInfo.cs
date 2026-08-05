@@ -212,7 +212,9 @@ namespace Digi.ParticleEditor.GameData
 
             [new PropId(MyGPUGenerationPropertiesEnum.RotationReference)] = new PropertyData() // enum
             {
-                TooltipAddition = "The 'Local and camera' value does nothing different than 'Local' in SE v201.",
+                TooltipAddition = "- 'Camera' rotates each sprite to be facing the camera." +
+                                "\n- 'Local' does not rotate it but maintains rotation relative to particle effect." +
+                                "\n- 'Local and camera' does not seem to do anything (last checked SE v1.206)",
             },
 
             [new PropId(MyGPUGenerationPropertiesEnum.Angle)] = new PropertyData() // Vector3
@@ -232,6 +234,7 @@ namespace Digi.ParticleEditor.GameData
                 ValueRangeNum = new ValueInfo<float>(0f, 10f),
                 RequiredKeys1D = 1,
                 RequiredKeys2D = 1,
+                TooltipAddition = "NOTE: It ignores more than 4 horizontal keys and the 4th is always assumed at the end so might as well leave it there. 3 keys and less work as normal.",
             },
             [new PropId(MyGPUGenerationPropertiesEnum.RadiusVar)] = new PropertyData() // float
             {
@@ -387,7 +390,8 @@ namespace Digi.ParticleEditor.GameData
             [new PropId(MyGPUGenerationPropertiesEnum.RotationVelocity)] = new PropertyData() // float
             {
                 ValueRangeNum = new ValueInfo<float>(-60f, 60f, defaultValue: 1f, round: 2),
-                TooltipAddition = "Value in degrees per tick (60 ticks per second).",
+                // TooltipAddition = "Value in degrees per tick (60 ticks per second).",
+                // DEBUG ^ does not seem true?
             },
             [new PropId(MyGPUGenerationPropertiesEnum.RotationVelocityVar)] = new PropertyData() // float
             {

@@ -16,6 +16,8 @@ namespace Digi.ParticleEditor
 {
     // TODO: multi-select support to edit the same property on multiple emitters/lights... needs quite some redesign
 
+    // TODO: import emitters from another particle effect, same for lights
+
     public class EditorEmitters
     {
         public MyParticleGPUGenerationData SelectedEmitter { get; private set; }
@@ -353,7 +355,7 @@ namespace Digi.ParticleEditor
 
             MyObjectBuilder_ParticleEffect originalOB = Editor.OriginalParticleData.GetValueOrDefault(SelectedParticle.Name);
 
-            string tooltip = (Editor.DrawOnlySelected ? "" : "Double-click to toggle Enabled.");
+            string tooltip = (Editor.DrawOnlySelected ? "" : "Double-click to toggle Enabled which is a saved property meaning it remains invisible, akin to commenting it out.");
 
             if(!SelectedParticle.Data.GetGenerations().Contains(SelectedEmitter))
             {
@@ -507,6 +509,8 @@ namespace Digi.ParticleEditor
                     ScrollHost.PropAnimated(emitter, emitter.ParticlesPerFrame);
 
                     ScrollHost.PropAnimated(emitter, emitter.ParticlesPerSecond);
+
+                    // TODO: render a cone to help visualize?
 
                     ScrollHost.PropAnimated(emitter, emitter.DirectionConeVar);
 
