@@ -6,7 +6,7 @@ namespace Digi.ParticleEditor
 {
     public class ParticleEditorPlugin : IPlugin
     {
-        public static readonly Version Version = new Version(1, 0, 6);
+        public static readonly Version Version = new Version(1, 0, 7);
 
         Editor Editor;
 
